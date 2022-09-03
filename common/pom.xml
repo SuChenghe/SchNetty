@@ -139,7 +139,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${collection.src.dir}</source>
+<!--                <source>${collection.src.dir}</source>-->
               </sources>
             </configuration>
           </execution>
@@ -151,7 +151,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${collection.testsrc.dir}</source>
+<!--                <source>${collection.testsrc.dir}</source>-->
               </sources>
             </configuration>
           </execution>
@@ -183,7 +183,7 @@
               <goal>execute</goal>
             </goals>
             <configuration>
-              <source>${project.basedir}/src/main/script/codegen.groovy</source>
+<!--              <source>${project.basedir}/src/main/script/codegen.groovy</source>-->
             </configuration>
           </execution>
         </executions>
