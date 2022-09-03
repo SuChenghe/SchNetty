@@ -38,6 +38,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -265,7 +266,7 @@ public class ChunkedWriteHandlerTest {
         ch.writeAndFlush(input).syncUninterruptibly();
         assertTrue(ch.finish());
 
-        assertEquals(0, ch.readOutbound());
+        assertEquals(Optional.of(0), ch.readOutbound());
         assertNull(ch.readOutbound());
     }
 

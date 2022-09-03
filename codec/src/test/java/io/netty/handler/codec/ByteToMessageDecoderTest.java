@@ -31,6 +31,7 @@ import io.netty.util.internal.PlatformDependent;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -502,10 +503,10 @@ public class ByteToMessageDecoderTest {
         };
         EmbeddedChannel channel = new EmbeddedChannel(decoder);
         assertTrue(channel.writeInbound(Unpooled.wrappedBuffer(new byte[]{1, 2, 3, 4, 5})));
-        assertEquals((byte) 1,  channel.readInbound());
-        assertEquals((byte) 2,  channel.readInbound());
-        assertEquals((byte) 3,  channel.readInbound());
-        assertEquals((byte) 4,  channel.readInbound());
+        assertEquals(Optional.of((byte) 1),  channel.readInbound());
+        assertEquals(Optional.of((byte) 2),  channel.readInbound());
+        assertEquals(Optional.of((byte) 3),  channel.readInbound());
+        assertEquals(Optional.of((byte) 4),  channel.readInbound());
         ByteBuf buffer5 = channel.readInbound();
         assertEquals((byte) 5, buffer5.readByte());
         assertFalse(buffer5.isReadable());

@@ -15,9 +15,16 @@
 
 package io.netty.util.collection;
 
-import java.util.*;
-
 import static io.netty.util.internal.MathUtil.safeFindNextPositivePowerOfTwo;
+
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * A hash map implementation of {@link IntObjectMap} that uses open addressing for keys.
@@ -29,14 +36,10 @@ import static io.netty.util.internal.MathUtil.safeFindNextPositivePowerOfTwo;
  */
 public class IntObjectHashMap<V> implements IntObjectMap<V> {
 
-    /**
-     * Default initial capacity. Used if not specified in the constructor
-     */
+    /** Default initial capacity. Used if not specified in the constructor */
     public static final int DEFAULT_CAPACITY = 8;
 
-    /**
-     * Default load factor. Used if not specified in the constructor
-     */
+    /** Default load factor. Used if not specified in the constructor */
     public static final float DEFAULT_LOAD_FACTOR = 0.5f;
 
     /**
@@ -45,14 +48,10 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
      */
     private static final Object NULL_VALUE = new Object();
 
-    /**
-     * The maximum number of elements allowed without allocating more space.
-     */
+    /** The maximum number of elements allowed without allocating more space. */
     private int maxSize;
 
-    /**
-     * The load factor for the map. Used to calculate {@link #maxSize}.
-     */
+    /** The load factor for the map. Used to calculate {@link #maxSize}. */
     private final float loadFactor;
 
     private int[] keys;
@@ -92,7 +91,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
 
         // Allocate the arrays.
         keys = new int[capacity];
-        @SuppressWarnings({"unchecked", "SuspiciousArrayCast"})
+        @SuppressWarnings({ "unchecked", "SuspiciousArrayCast" })
         V[] temp = (V[]) new Object[capacity];
         values = temp;
 
@@ -121,7 +120,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
         int startIndex = hashIndex(key);
         int index = startIndex;
 
-        for (; ; ) {
+        for (;;) {
             if (values[index] == null) {
                 // Found empty slot, use it.
                 keys[index] = key;
@@ -189,7 +188,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
 
     @Override
     public void clear() {
-        Arrays.fill(keys, 0);
+        Arrays.fill(keys, (int) 0);
         Arrays.fill(values, null);
         size = 0;
     }
@@ -329,7 +328,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
     }
 
     private int objectToKey(Object key) {
-        return ((Integer) key).intValue();
+        return (int) ((Integer) key).intValue();
     }
 
     /**
@@ -342,7 +341,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
         int startIndex = hashIndex(key);
         int index = startIndex;
 
-        for (; ; ) {
+        for (;;) {
             if (values[index] == null) {
                 // It's available, so no chance that this value exists anywhere in the map.
                 return -1;
@@ -370,7 +369,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
      * Returns the hash code for the key.
      */
     private static int hashCode(int key) {
-        return key;
+        return (int) key;
     }
 
     /**
@@ -454,7 +453,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
         V[] oldVals = values;
 
         keys = new int[newCapacity];
-        @SuppressWarnings({"unchecked", "SuspiciousArrayCast"})
+        @SuppressWarnings({ "unchecked", "SuspiciousArrayCast" })
         V[] temp = (V[]) new Object[newCapacity];
         values = temp;
 
@@ -470,7 +469,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
                 int oldKey = oldKeys[i];
                 int index = hashIndex(oldKey);
 
-                for (; ; ) {
+                for (;;) {
                     if (values[index] == null) {
                         keys[index] = oldKey;
                         values[index] = oldVal;
@@ -551,7 +550,7 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
         @Override
         public boolean retainAll(Collection<?> retainedKeys) {
             boolean changed = false;
-            for (Iterator<PrimitiveEntry<V>> iter = entries().iterator(); iter.hasNext(); ) {
+            for (Iterator<PrimitiveEntry<V>> iter = entries().iterator(); iter.hasNext();) {
                 PrimitiveEntry<V> entry = iter.next();
                 if (!retainedKeys.contains(entry.key())) {
                     changed = true;
@@ -598,8 +597,8 @@ public class IntObjectHashMap<V> implements IntObjectMap<V> {
         private int entryIndex = -1;
 
         private void scanNext() {
-            while (++nextIndex != values.length && values[nextIndex] == null) {
-            }
+//            while (++nextIndex != values.length && values[nextIndex] == null) {
+//            }
         }
 
         @Override

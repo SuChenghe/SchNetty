@@ -64,3 +64,8 @@ are listed below:
 
 Automatic modules do not provide any means to declare dependencies, so you need to list each used module separately
 in your `module-info` file.
+
+
+1、$JAVA_HOME的include目录下，必须有jni.h等文件。
+2、automake安装：brew install automake(会自动安装autoconf)
+3、libtool安装： brew install libtool
