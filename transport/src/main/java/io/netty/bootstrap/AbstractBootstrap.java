@@ -33,6 +33,7 @@ import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.SocketUtils;
 import io.netty.util.internal.StringUtil;
 import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -51,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * transports such as datagram (UDP).</p>
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractBootstrap.class);
     @SuppressWarnings("unchecked")
     private static final Map.Entry<ChannelOption<?>, Object>[] EMPTY_OPTION_ARRAY = new Map.Entry[0];
     @SuppressWarnings("unchecked")
@@ -269,11 +271,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
+        logger.debug("start to init and register channel");
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
             return regFuture;
         }
+        logger.debug("init and register channel success");
 
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
@@ -305,10 +309,24 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     final ChannelFuture initAndRegister() {
+
         Channel channel = null;
         try {
+            logger.debug("");
+            logger.debug("++++++");
+            logger.debug("NioServerSocketChannel 开始实例化");
+            logger.debug("从 ChannelFactory:{} ,调用newChannel() 进行Channel的构造" ,channelFactory);
             channel = channelFactory.newChannel();
+            logger.debug("NioServerSocketChannel 实例化成功 : {}",channel);
+            logger.debug("++++++");
+
+            logger.debug("");
+            logger.debug("++++++");
+            logger.debug("NioServerSocketChannel 开始初始化(start to init) : {}",channel);
             init(channel);
+            logger.debug("NioServerSocketChannel 初始化结束(init end) : {}",channel);
+            logger.debug("++++++");
+            logger.debug("");
         } catch (Throwable t) {
             if (channel != null) {
                 // channel can be null if newChannel crashed (eg SocketException("too many open files"))

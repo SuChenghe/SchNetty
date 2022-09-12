@@ -93,9 +93,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
+        logger.debug("DefaultChannelPipeline create SucceededChannelFuture : {}" , succeededFuture);
+        logger.debug("DefaultChannelPipeline create VoidChannelPromise : {}" , voidPromise);
 
         tail = new TailContext(this);
         head = new HeadContext(this);
+        logger.debug("DefaultChannelPipeline create TailContext Complete");
+        logger.debug("DefaultChannelPipeline create HeadContext Complete");
 
         head.next = tail;
         tail.prev = head;
@@ -202,6 +206,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             checkMultiplicity(handler);
 
             newCtx = newContext(group, filterName(name, handler), handler);
+            logger.debug("将ChannelHandler : {} 作为参数,创建一个AbstractChannelHandlerContext : {}",handler,newCtx);
 
             addLast0(newCtx);
 
@@ -209,6 +214,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // In this case we add the context to the pipeline and add a task that will call
             // ChannelHandler.handlerAdded(...) once the channel is registered.
             if (!registered) {
+                logger.debug("AbstractChannelHandlerContext set to AddPending : {}" ,newCtx);
                 newCtx.setAddPending();
                 callHandlerCallbackLater(newCtx, true);
                 return this;
@@ -225,11 +231,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     private void addLast0(AbstractChannelHandlerContext newCtx) {
+        logger.debug("addLast0 before, tail : {} ,tail.prev",tail,tail.prev);
         AbstractChannelHandlerContext prev = tail.prev;
         newCtx.prev = prev;
         newCtx.next = tail;
         prev.next = newCtx;
         tail.prev = newCtx;
+        logger.debug("addLast0 after, tail : {} ,tail.prev",tail,tail.prev);
     }
 
     @Override
@@ -1121,15 +1129,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         assert !registered;
 
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
+        logger.debug("PendingHandlerCallback Task create : {}",task);
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
             pendingHandlerCallbackHead = task;
+            logger.debug("Set the PendingHandlerCallback : {} to PendingHandlerCallbackHead",task);
         } else {
             // Find the tail of the linked-list.
             while (pending.next != null) {
                 pending = pending.next;
             }
             pending.next = task;
+            logger.debug("Set the PendingHandlerCallback : {} to The Last PendingHandlerCallback's next :{} ",task,pending);
         }
     }
 

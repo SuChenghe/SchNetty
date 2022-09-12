@@ -920,6 +920,8 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             // Ensure we never update when the handlerState is REMOVE_COMPLETE already.
             // oldState is usually ADD_PENDING but can also be REMOVE_COMPLETE when an EventExecutor is used that is not
             // exposing ordering guarantees.
+            logger.debug("AbstractChannelHandlerContext's handlerState set to ADD_COMPLETE ," +
+                    " this ChannelHandlerContext : {}" ,ADD_COMPLETE);
             if (HANDLER_STATE_UPDATER.compareAndSet(this, oldState, ADD_COMPLETE)) {
                 return true;
             }

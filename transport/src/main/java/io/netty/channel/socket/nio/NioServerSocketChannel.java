@@ -59,7 +59,28 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
              *
              *  See <a href="https://github.com/netty/netty/issues/2308">#2308</a>.
              */
-            return provider.openServerSocketChannel();
+            //return provider.openServerSocketChannel();
+            logger.debug("NioServerSocketChannel() : DEFAULT_SELECTOR_PROVIDER 定义为 : private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();");
+            logger.debug("NioServerSocketChannel() : DEFAULT_SELECTOR_PROVIDER 实际值为 : {}" , provider);
+            ServerSocketChannel serverSocketChannel = provider.openServerSocketChannel();
+            logger.debug("NioServerSocketChannel() newSocket(DEFAULT_SELECTOR_PROVIDER) 核心方法为 : {}" , "ServerSocketChannel serverSocketChannel = provider.openServerSocketChannel()  return serverSocketChannel;");
+            logger.debug("NioServerSocketChannel() newSocket(DEFAULT_SELECTOR_PROVIDER) 实现业务为 : {}" , "create A ServerSocketChannel and return");
+            logger.debug("NioServerSocketChannel() The ServerSocketChannel is : {}" , serverSocketChannel.toString());
+
+
+            logger.debug("NioServerSocketChannel() public NioServerSocketChannel() {this(newSocket(DEFAULT_SELECTOR_PROVIDER));} -> 调用方法为");
+            logger.debug("NioServerSocketChannel() : public NioServerSocketChannel(ServerSocketChannel channel) {\n" +
+                    "                super(null, channel, SelectionKey.OP_ACCEPT);\n" +
+                    "                config = new NioServerSocketChannelConfig(this, javaChannel().socket());\n" +
+                    "            }");
+            logger.debug("NioServerSocketChannel() : NioServerSocketChannel extend AbstractNioMessageChannel extend AbstractNioChannel extend AbstractChannel");
+            logger.debug("NioServerSocketChannel() : super(null, channel, SelectionKey.OP_ACCEPT); -> 最终调用了");
+            logger.debug("NioServerSocketChannel() : AbstractChannel -> protected AbstractChannel(Channel parent) {...} : parent 为null，即传入的一个参数");
+            logger.debug("NioServerSocketChannel() : AbstractNioChannel -> protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp)");
+            logger.debug("NioServerSocketChannel() : AbstractNioChannel -> 逻辑为 : 将 ch 赋值给本类的 private final SelectableChannel ch ;");
+            logger.debug("NioServerSocketChannel() : AbstractNioChannel -> 逻辑为 : 将 readInterestOp 赋值给本类的 protected final int readInterestOp;");
+            logger.debug("NioServerSocketChannel() : AbstractNioChannel -> 逻辑为 : 将 ch 设置为非阻塞 ch.configureBlocking(false);");
+            return serverSocketChannel;
         } catch (IOException e) {
             throw new ChannelException(
                     "Failed to open a server socket.", e);

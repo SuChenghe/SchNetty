@@ -69,9 +69,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
+        logger.debug("protected AbstractChannel(Channel parent) {...} : 具体实现方法为 : ");
         this.parent = parent;
         id = newId();
+        logger.debug("AbstractChannel(Channel parent) : AbstractChannel create , Channel id : {}" , id);
         unsafe = newUnsafe();
+        logger.debug("AbstractChannel(Channel parent) : AbstractChannel create , newUnsafe() : {}" , "AbstractChannel -> protected abstract AbstractUnsafe newUnsafe()");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractChannel 子类 -> AbstractNioChannel 定义了 AbstractNioUnsafe -> protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractNioChannel 子类 -> AbstractNioMessageChannel 定义了 NioMessageUnsafe -> private final class NioMessageUnsafe extends AbstractNioUnsafe");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractNioMessageChannel 类 -> 实现了newUnsafe()方法 -> protected AbstractNioUnsafe newUnsafe() { return new NioMessageUnsafe();");
+        logger.debug("AbstractChannel create , DefaultChannelPipeline , start to create");
         pipeline = newChannelPipeline();
     }
 

@@ -129,8 +129,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     @Override
     void init(Channel channel) {
-        setChannelOptions(channel, newOptionsArray(), logger);
-        setAttributes(channel, newAttributesArray());
+
+        Map.Entry<ChannelOption<?>, Object>[] newOptionsArray = newOptionsArray();
+        Map.Entry<AttributeKey<?>, Object>[]  newAttributesArray = newAttributesArray();
+        logger.debug("Channel : {} , setChannelOptions : {} ",channel,newOptionsArray);
+        logger.debug("Channel : {} , newAttributesArray : {} ",channel,newAttributesArray);
+        setChannelOptions(channel, newOptionsArray, logger);
+        setAttributes(channel, newAttributesArray);
 
         ChannelPipeline p = channel.pipeline();
 
@@ -139,7 +144,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         final Entry<ChannelOption<?>, Object>[] currentChildOptions = newOptionsArray(childOptions);
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs = newAttributesArray(childAttrs);
 
-        p.addLast(new ChannelInitializer<Channel>() {
+        ChannelInitializer channelInitializer = new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) {
                 final ChannelPipeline pipeline = ch.pipeline();
@@ -156,7 +161,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                     }
                 });
             }
-        });
+        };
+        logger.debug("Channel : {} , ChannelPipeline : {}, start add Last A ChannelInitializer : {}",channel,p,channelInitializer);
+        p.addLast(channelInitializer);
     }
 
     @Override

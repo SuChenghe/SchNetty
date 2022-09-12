@@ -80,8 +80,11 @@ final class ChannelHandlerMask {
         Integer mask = cache.get(clazz);
         if (mask == null) {
             mask = mask0(clazz);
+            logger.debug("Calculate the ChannelHandler's  ChannelHandlerMask , ChannelHandler : {} , mask : {}" ,
+                    clazz , mask);
             cache.put(clazz, mask);
         }
+        logger.debug("Return the ChannelHandler's  ChannelHandlerMask , ChannelHandler : {} , mask : {}" ,clazz , mask);
         return mask;
     }
 
