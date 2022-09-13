@@ -26,6 +26,7 @@ import io.netty.channel.DefaultChannelPromise;
 import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ReflectiveChannelFactory;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -280,16 +281,19 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         logger.debug("init and register channel success");
 
         if (regFuture.isDone()) {
+            logger.info("ChannelFuture regFuture is Done");
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
+            logger.debug("ChannelFuture regFuture is not Done");
             // Registration future is almost always fulfilled already, but just in case it's not.
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
             regFuture.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
+                    logger.info("ChannelFuture regFuture is Done");
                     Throwable cause = future.cause();
                     if (cause != null) {
                         // Registration on the EventLoop failed so fail the ChannelPromise directly to not cause an
@@ -338,7 +342,30 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        ChannelFuture regFuture = config().group().register(channel);
+        logger.debug("");
+        logger.debug("++++++");
+        logger.debug("NioServerSocketChannel 开始注册 , 执行方法为 : {}","ChannelFuture regFuture = config().group().register(channel);");
+        EventLoopGroup eventLoopGroup = config().group();
+        logger.debug("NioServerSocketChannel 注册 : config().group() , 即 EventLoopGroup为 : {}",eventLoopGroup);
+        logger.debug("NioServerSocketChannel 注册 : MultithreadEventLoopGroup register(channel) 的方法实现为 : " +
+                "\n  MultithreadEventLoopGroup 类 : " +
+                "    @Override\n" +
+                "    public ChannelFuture register(Channel channel) {\n" +
+                "        return next().register(channel);\n" +
+                "    }" +
+                "    " +
+                "    @Override\n" +
+                "    public EventLoop next() {\n" +
+                "        return (EventLoop) super.next();\n" +
+                "    }" +
+                " ");
+        logger.debug("NioServerSocketChannel 注册 : MultithreadEventLoopGroup extends MultithreadEventExecutorGroup");
+
+
+
+
+        ChannelFuture regFuture = eventLoopGroup.register(channel);
+
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
                 channel.close();
@@ -346,6 +373,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                 channel.unsafe().closeForcibly();
             }
         }
+        logger.debug("NioServerSocketChannel 注册完成");
+        logger.debug("++++++");
+        logger.debug("");
 
         // If we are here and the promise is not failed, it's one of the following cases:
         // 1) If we attempted registration from the event loop, the registration has been completed at this point.
@@ -370,7 +400,24 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
+                logger.debug("doBind0 方法开始执行");
                 if (regFuture.isSuccess()) {
+                    logger.debug("doBind0 执行 channel.bind(localAddress, promise) , channel : {}",channel);
+                    logger.debug("doBind0 执行 : AbstractChannel extend Channel extend ChannelOutboundInvoker");
+                    logger.debug("doBind0 执行 : ChannelOutboundInvoker 中定义了接口方法 -> ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise);");
+                    logger.debug("doBind0 执行 : 抽象类 AbstractChannel 进行了实现 ：—> " +
+                            "\n    AbstractChannel\n" +
+                            "    @Override\n" +
+                            "    public ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {\n" +
+                            "        return pipeline.bind(localAddress, promise);\n" +
+                            "    }");
+                    logger.debug("doBind0 执行 : DefaultChannelPipeline 方法实现为 ：—>" +
+                            "\n  DefaultChannelPipeline\n" +
+                            "    @Override\n" +
+                            "    public final ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {\n" +
+                            "        return tail.bind(localAddress, promise);\n" +
+                            "    }");
+
                     channel.bind(localAddress, promise).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
                     promise.setFailure(regFuture.cause());

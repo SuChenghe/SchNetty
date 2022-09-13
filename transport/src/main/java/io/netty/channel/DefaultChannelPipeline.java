@@ -90,19 +90,26 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private boolean registered;
 
     protected DefaultChannelPipeline(Channel channel) {
+        logger.debug("DefaultChannelPipeline(Channel channel) 方法实现 , 开始执行");
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
-        succeededFuture = new SucceededChannelFuture(channel, null);
-        voidPromise =  new VoidChannelPromise(channel, true);
-        logger.debug("DefaultChannelPipeline create SucceededChannelFuture : {}" , succeededFuture);
-        logger.debug("DefaultChannelPipeline create VoidChannelPromise : {}" , voidPromise);
 
+        succeededFuture = new SucceededChannelFuture(channel, null);
+        logger.debug("DefaultChannelPipeline(Channel channel) : create SucceededChannelFuture : {}" , succeededFuture);
+
+        voidPromise =  new VoidChannelPromise(channel, true);
+        logger.debug("DefaultChannelPipeline(Channel channel) : create VoidChannelPromise : {}" , voidPromise);
+
+        logger.debug("DefaultChannelPipeline(Channel channel) : start to create TailContext");
         tail = new TailContext(this);
+        logger.debug("DefaultChannelPipeline(Channel channel) : create TailContext Complete");
+        logger.debug("DefaultChannelPipeline(Channel channel) : start to create HeadContext");
         head = new HeadContext(this);
-        logger.debug("DefaultChannelPipeline create TailContext Complete");
-        logger.debug("DefaultChannelPipeline create HeadContext Complete");
+        logger.debug("DefaultChannelPipeline(Channel channel) : create HeadContext Complete");
 
         head.next = tail;
         tail.prev = head;
+
+        logger.debug("DefaultChannelPipeline(Channel channel) 方法实现 , 执行完成");
     }
 
     final MessageSizeEstimator.Handle estimatorHandle() {

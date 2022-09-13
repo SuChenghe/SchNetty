@@ -103,10 +103,16 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor,
                                   String name, Class<? extends ChannelHandler> handlerClass) {
+        logger.debug("AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor,\n" +
+                "                                  String name, Class<? extends ChannelHandler> handlerClass), 方法执行开始" );
         this.name = ObjectUtil.checkNotNull(name, "name");
+        logger.debug("AbstractChannelHandlerContext(......) , name : {}" , name);
         this.pipeline = pipeline;
+        logger.debug("AbstractChannelHandlerContext(......) , this.pipeline = pipeline " );
         this.executor = executor;
+        logger.debug("AbstractChannelHandlerContext(......) , this.executor = executor");
         this.executionMask = mask(handlerClass);
+        logger.debug("AbstractChannelHandlerContext(......) , executionMask : {}" , executionMask);
         // Its ordered if its driven by the EventLoop or the given Executor is an instanceof OrderedEventExecutor.
         ordered = executor == null || executor instanceof OrderedEventExecutor;
     }
@@ -920,8 +926,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             // Ensure we never update when the handlerState is REMOVE_COMPLETE already.
             // oldState is usually ADD_PENDING but can also be REMOVE_COMPLETE when an EventExecutor is used that is not
             // exposing ordering guarantees.
-            logger.debug("AbstractChannelHandlerContext's handlerState set to ADD_COMPLETE ," +
-                    " this ChannelHandlerContext : {}" ,ADD_COMPLETE);
+            logger.debug("AbstractChannelHandlerContext's handlerState set to ADD_COMPLETE");
             if (HANDLER_STATE_UPDATER.compareAndSet(this, oldState, ADD_COMPLETE)) {
                 return true;
             }

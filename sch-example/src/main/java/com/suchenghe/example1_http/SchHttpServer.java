@@ -17,19 +17,19 @@ public class SchHttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchHttpServer.class);
 
     public static void main(String[] args) throws InterruptedException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workGroup = new NioEventLoopGroup();
+        EventLoopGroup parentGroup = new NioEventLoopGroup();
+        EventLoopGroup childGroup = new NioEventLoopGroup();
         try{
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workGroup).channel(NioServerSocketChannel.class)
+            serverBootstrap.group(parentGroup,childGroup).channel(NioServerSocketChannel.class)
                     .childHandler(new SchHttpServerInitializer());
 
             ChannelFuture channelFuture = serverBootstrap.bind(8899).sync();
             LOGGER.info("SchHttpServer服务端启动成功");
             channelFuture.channel().closeFuture().sync();
         }finally {
-            bossGroup.shutdownGracefully();
-            workGroup.shutdownGracefully();
+            parentGroup.shutdownGracefully();
+            childGroup.shutdownGracefully();
         }
 
     }

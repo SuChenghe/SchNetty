@@ -16,6 +16,7 @@
 package io.netty.channel;
 
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.nio.AbstractNioChannel;
 import io.netty.channel.socket.ChannelOutputShutdownEvent;
 import io.netty.channel.socket.ChannelOutputShutdownException;
 import io.netty.util.DefaultAttributeMap;
@@ -69,17 +70,32 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
-        logger.debug("protected AbstractChannel(Channel parent) {...} : 具体实现方法为 : ");
+        logger.debug("protected AbstractChannel(Channel parent) {...} : 开始执行，主要是为创建一个AbstractChannel");
         this.parent = parent;
         id = newId();
-        logger.debug("AbstractChannel(Channel parent) : AbstractChannel create , Channel id : {}" , id);
+        logger.debug("AbstractChannel(Channel parent) : Channel id created : {}" , id);
         unsafe = newUnsafe();
-        logger.debug("AbstractChannel(Channel parent) : AbstractChannel create , newUnsafe() : {}" , "AbstractChannel -> protected abstract AbstractUnsafe newUnsafe()");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractChannel 子类 -> AbstractNioChannel 定义了 AbstractNioUnsafe -> protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractNioChannel 子类 -> AbstractNioMessageChannel 定义了 NioMessageUnsafe -> private final class NioMessageUnsafe extends AbstractNioUnsafe");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() : {}" , "AbstractNioMessageChannel 类 -> 实现了newUnsafe()方法 -> protected AbstractNioUnsafe newUnsafe() { return new NioMessageUnsafe();");
-        logger.debug("AbstractChannel create , DefaultChannelPipeline , start to create");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 1、newUnsafe() 方法在AbstractChannel类中定义为 —> {}" , "AbstractChannel -> protected abstract AbstractUnsafe newUnsafe()");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 1、AbstractUnsafe类 在AbstractChannel类中定义为 -> {}" , "protected abstract class AbstractUnsafe implements Unsafe");
+
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel extends AbstractNioMessageChannel extends AbstractNioChannel extend AbstractChannel");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel 继承了 AbstractNioMessageChannel , 所以实际调用的是 AbstractNioMessageChannel 重写的父类方法 -> {}",
+                "\n  AbstractNioMessageChannel 类中定义 : \n" +
+                "    @Override\n" +
+                "    protected AbstractNioUnsafe newUnsafe() {\n" +
+                "        return new NioSocketChannelUnsafe();\n" +
+                "    }");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、AbstractNioUnsafe类 定义为 : -> {}" , "protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe");
+        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() 在 AbstractNioMessageChannel 中的定义为 : -> {}" , "private final class NioMessageUnsafe extends AbstractNioUnsafe");
+
+        logger.debug("AbstractChannel(Channel parent) : newChannelPipeline() 调用开始 : {} " ,
+                "\n  AbstractChannel类中定义为\n" +
+                "    protected DefaultChannelPipeline newChannelPipeline() {\n" +
+                "        return new DefaultChannelPipeline(this);\n" +
+                "    }");
         pipeline = newChannelPipeline();
+        logger.debug("AbstractChannel(Channel parent) : newChannelPipeline() 调用完成");
+        logger.debug("protected AbstractChannel(Channel parent) {...} : 结束执行");
     }
 
     /**
@@ -490,6 +506,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
+                            logger.debug("eventLoop.execute register0,eventLoop : {}",eventLoop);
                             register0(promise);
                         }
                     });

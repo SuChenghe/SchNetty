@@ -162,8 +162,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 });
             }
         };
-        logger.debug("Channel : {} , ChannelPipeline : {}, start add Last A ChannelInitializer : {}",channel,p,channelInitializer);
+        logger.debug("将ChannelInitializer 添加到 Channel 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
         p.addLast(channelInitializer);
+        logger.debug("将ChannelInitializer 添加到 Channel 的尾部 , 添加完成 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
     }
 
     @Override
