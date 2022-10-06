@@ -30,6 +30,8 @@ import io.netty.channel.socket.ChannelInputShutdownEvent;
 import io.netty.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
@@ -41,6 +43,8 @@ import static io.netty.channel.internal.ChannelUtils.WRITE_STATUS_SNDBUF_FULL;
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on bytes.
  */
 public abstract class AbstractNioByteChannel extends AbstractNioChannel {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractNioByteChannel.class);
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
     private static final String EXPECTED_TYPES =
             " (expected: " + StringUtil.simpleClassName(ByteBuf.class) + ", " +
@@ -133,6 +137,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
         @Override
         public final void read() {
+            logger.debug("NioByteUnsafe read() start to invoke");
             final ChannelConfig config = config();
             if (shouldBreakReadReady(config)) {
                 clearReadPending();
@@ -140,7 +145,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             }
             final ChannelPipeline pipeline = pipeline();
             final ByteBufAllocator allocator = config.getAllocator();
+            logger.debug("NioByteUnsafe read() : ByteBufAllocator allocator : {}",allocator);
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
+            logger.debug("NioByteUnsafe read() : RecvByteBufAllocator.Handle allocHandle : {}",allocHandle);
             allocHandle.reset(config);
 
             ByteBuf byteBuf = null;

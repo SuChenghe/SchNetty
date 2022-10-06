@@ -20,12 +20,17 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.UncheckedBooleanSupplier;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * Default implementation of {@link MaxMessagesRecvByteBufAllocator} which respects {@link ChannelConfig#isAutoRead()}
  * and also prevents overflow.
  */
 public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessagesRecvByteBufAllocator {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultMaxMessagesRecvByteBufAllocator.class);
+
     private volatile int maxMessagesPerRead;
     private volatile boolean respectMaybeMoreData = true;
 
@@ -111,7 +116,10 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
 
         @Override
         public ByteBuf allocate(ByteBufAllocator alloc) {
-            return alloc.ioBuffer(guess());
+            //return alloc.ioBuffer(guess());
+            int guess = guess();
+            logger.debug("MaxMessageHandle allocate(ByteBufAllocator alloc) : guess : {}",guess);
+            return alloc.ioBuffer(guess);
         }
 
         @Override

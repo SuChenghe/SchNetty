@@ -22,11 +22,16 @@ import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakTracker;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * Skeletal {@link ByteBufAllocator} implementation to extend.
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBufAllocator.class);
+
     static final int DEFAULT_INITIAL_CAPACITY = 256;
     static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE;
     static final int DEFAULT_MAX_COMPONENTS = 16;
@@ -143,7 +148,9 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     @Override
     public ByteBuf ioBuffer(int initialCapacity, int maxCapacity) {
+        logger.debug("AbstractByteBufAllocator : public ByteBuf ioBuffer(int initialCapacity, int maxCapacity) start to invoke");
         if (PlatformDependent.hasUnsafe() || isDirectBufferPooled()) {
+            logger.debug("AbstractByteBufAllocator : public ByteBuf ioBuffer(...) : PlatformDependent.hasUnsafe() || isDirectBufferPooled()");
             return directBuffer(initialCapacity, maxCapacity);
         }
         return heapBuffer(initialCapacity, maxCapacity);

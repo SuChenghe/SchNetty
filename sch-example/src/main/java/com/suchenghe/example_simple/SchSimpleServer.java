@@ -1,4 +1,4 @@
-package com.suchenghe.study.example_simple;
+package com.suchenghe.example_simple;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -6,6 +6,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,20 +24,24 @@ public class SchSimpleServer {
      * 启动服务
      */
     public static void main(String[] args) throws InterruptedException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(new DefaultThreadFactory("schBossGroup"));
-        EventLoopGroup workerGroup = new NioEventLoopGroup(new DefaultThreadFactory("schWorkGroup"));
+
+        System.setProperty("io.netty.allocator.type","unpooled");
+
+        EventLoopGroup parentGroup = new NioEventLoopGroup(1,new DefaultThreadFactory("schParentGroup"));
+        EventLoopGroup childGroup = new NioEventLoopGroup(1,new DefaultThreadFactory("schChildGroup"));
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
+            serverBootstrap.group(parentGroup,childGroup).channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG,1024)
+                .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new SchSimpleInitializer());
 
             ChannelFuture channelFuture = serverBootstrap.bind(61005).sync();
-            LOGGER.info("SchHttpServer服务端启动成功,port:{}",61005);
+            LOGGER.info("SchSimpleServer服务端启动成功,port:{}",61005);
             channelFuture.channel().closeFuture().sync();
         } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            parentGroup.shutdownGracefully();
+            childGroup.shutdownGracefully();
         }
     }
 

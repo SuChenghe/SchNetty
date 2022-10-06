@@ -80,8 +80,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         super(parent);
         this.ch = ch;
         this.readInterestOp = readInterestOp;
+        logger.debug("AbstractNioChannel(...) : this.readInterestOp = readInterestOp , this.readInterestOp : {}" ,
+                this.readInterestOp);
         try {
             ch.configureBlocking(false);
+            logger.debug("AbstractNioChannel(...) : ch.configureBlocking(false) , ch : {} ", ch);
         } catch (IOException e) {
             try {
                 ch.close();
@@ -378,6 +381,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         for (;;) {
             try {
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
+                logger.debug("register channel to eventLoop().unwrappedSelector() : 方法实现 : {} ",
+                        "\n volatile SelectionKey selectionKey;" +
+                        "\n selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);");
+                logger.debug("register channel to eventLoop().unwrappedSelector() : channel : {} ,unwrappedSelector : {}"
+                        , this , eventLoop().unwrappedSelector());
                 return;
             } catch (CancelledKeyException e) {
                 if (!selected) {

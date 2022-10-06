@@ -17,6 +17,8 @@ package io.netty.util.internal;
 
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.FastThreadLocal;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
@@ -25,6 +27,8 @@ import java.util.concurrent.ThreadFactory;
  * Allow to retrieve the {@link EventExecutor} for the calling {@link Thread}.
  */
 public final class ThreadExecutorMap {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(ThreadExecutorMap.class);
 
     private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();
 
@@ -54,6 +58,7 @@ public final class ThreadExecutorMap {
         return new Executor() {
             @Override
             public void execute(final Runnable command) {
+                logger.debug("this : {} 's Executor, 开始执行 ", this );
                 executor.execute(apply(command, eventExecutor));
             }
         };
@@ -70,6 +75,8 @@ public final class ThreadExecutorMap {
             @Override
             public void run() {
                 setCurrentEventExecutor(eventExecutor);
+                logger.debug("set Current EventExecutor to Current Thread , eventExecutor : {} , Thread : {}"
+                        , eventExecutor , Thread.currentThread().getName());
                 try {
                     command.run();
                 } finally {

@@ -15,6 +15,9 @@
  */
 package io.netty.util.internal;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -42,6 +45,8 @@ import java.util.Enumeration;
  * {@link SocketPermission}.
  */
 public final class SocketUtils {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(SocketUtils.class);
 
     private static final Enumeration<Object> EMPTY = Collections.enumeration(Collections.emptyList());
 
@@ -116,6 +121,8 @@ public final class SocketUtils {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<SocketChannel>() {
                 @Override
                 public SocketChannel run() throws IOException {
+                    logger.debug("SocketUtils 类的静态方法定义为 : SocketChannel accept(final ServerSocketChannel serverSocketChannel) , " +
+                            " 具体实现为 : serverSocketChannel.accept()");
                     return serverSocketChannel.accept();
                 }
             });

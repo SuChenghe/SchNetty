@@ -165,11 +165,15 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                                         boolean addTaskWakesUp, Queue<Runnable> taskQueue,
                                         RejectedExecutionHandler rejectedHandler) {
         super(parent);
+        logger.debug("NioEventLoop 继承关系 : NioEventLoop extends SingleThreadEventLoop extends SingleThreadEventExecutor ");
         this.addTaskWakesUp = addTaskWakesUp;
         this.maxPendingTasks = DEFAULT_MAX_PENDING_EXECUTOR_TASKS;
         this.executor = ThreadExecutorMap.apply(executor, this);
+        logger.debug("SingleThreadEventExecutor : Executor executor : {}" , this.executor);
         this.taskQueue = ObjectUtil.checkNotNull(taskQueue, "taskQueue");
+        logger.debug("SingleThreadEventExecutor : Queue<Runnable> taskQueue : {}" , this.taskQueue);
         this.rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
+        logger.debug("SingleThreadEventExecutor : RejectedExecutionHandler rejectedExecutionHandler : {}" , this.rejectedExecutionHandler);
     }
 
     /**
@@ -824,6 +828,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     private void execute(Runnable task, boolean immediate) {
+        logger.debug("SingleThreadEventExecutor start to execute(Runnable task, boolean immediate) : this : {}",this);
         boolean inEventLoop = inEventLoop();
         addTask(task);
         if (!inEventLoop) {
@@ -944,6 +949,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 boolean success = false;
                 try {
+                    logger.debug("This NioEventLoop hash not started , doStartThread() : {}" , this);
                     doStartThread();
                     success = true;
                 } finally {

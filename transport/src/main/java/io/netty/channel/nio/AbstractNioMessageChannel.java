@@ -70,6 +70,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
         @Override
         public void read() {
+            logger.debug("NioMessageUnsafe read() start to invoke : {}" , this);
             assert eventLoop().inEventLoop();
             final ChannelConfig config = config();
             final ChannelPipeline pipeline = pipeline();
@@ -81,6 +82,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     do {
+                        logger.debug("NioMessageUnsafe read() : to invoke doReadMessages(readBuf) , readBuf : {}" , readBuf);
                         int localRead = doReadMessages(readBuf);
                         if (localRead == 0) {
                             break;
@@ -99,10 +101,13 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 int size = readBuf.size();
                 for (int i = 0; i < size; i ++) {
                     readPending = false;
+                    logger.debug("NioMessageUnsafe read() : to invoke pipeline.fireChannelRead(readBuf.get(i)) ," +
+                            "i : {} , readBuf.get(i) : {}" , i , readBuf.get(i));
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
                 readBuf.clear();
                 allocHandle.readComplete();
+                logger.debug("NioMessageUnsafe read() : to invoke pipeline.fireChannelReadComplete()");
                 pipeline.fireChannelReadComplete();
 
                 if (exception != null) {

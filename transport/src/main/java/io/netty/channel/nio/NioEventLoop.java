@@ -138,10 +138,20 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         super(parent, executor, false, newTaskQueue(queueFactory), newTaskQueue(queueFactory),
                 rejectedExecutionHandler);
         this.provider = ObjectUtil.checkNotNull(selectorProvider, "selectorProvider");
+        logger.debug("NioEventLoop : SelectorProvider provider : {} " , this.provider);
         this.selectStrategy = ObjectUtil.checkNotNull(strategy, "selectStrategy");
+        logger.debug("NioEventLoop : SelectStrategy selectStrategy : {} " , this.selectStrategy);
         final SelectorTuple selectorTuple = openSelector();
+        logger.debug("NioEventLoop : SelectStrategy selectorTuple 方法 : {} " , "openSelector()");
+        logger.debug("NioEventLoop : SelectorTuple selectorTuple 值 : {} " , selectorTuple);
         this.selector = selectorTuple.selector;
+        logger.debug("NioEventLoop : Selector selector : {} " , this.selector);
+        logger.debug("NioEventLoop : Selector selector : 主要是将SelectorImpl中的" +
+                "\n private Set<SelectionKey> publicSelectedKeys;" +
+                "\n private Set<SelectionKey> selectedKeys; " +
+                "\n 替换成功数组形式的SelectionKey[] keys" );
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
+        logger.debug("NioEventLoop : Selector unwrappedSelector : {} " , this.unwrappedSelector);
     }
 
     private static Queue<Runnable> newTaskQueue(
@@ -577,7 +587,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private void processSelectedKeys() {
+        logger.debug("processSelectedKeys() start to invoke");
         if (selectedKeys != null) {
+            logger.debug("processSelectedKeys() : SelectedSelectionKeySet selectedKeys != null , start to invoke processSelectedKeysOptimized()");
             processSelectedKeysOptimized();
         } else {
             processSelectedKeysPlain(selector.selectedKeys());
@@ -643,6 +655,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private void processSelectedKeysOptimized() {
+        logger.debug("processSelectedKeysOptimized() start to invoke");
         for (int i = 0; i < selectedKeys.size; ++i) {
             final SelectionKey k = selectedKeys.keys[i];
             // null out entry in the array to allow to have it GC'ed once the Channel close
@@ -671,7 +684,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
+        logger.debug("processSelectedKey(SelectionKey k, AbstractNioChannel ch) : k : {} , ch : {}" , k , ch);
         final AbstractNioChannel.NioUnsafe unsafe = ch.unsafe();
+        logger.debug("processSelectedKey(...) : AbstractNioChannel ch : {}" , ch);
+        logger.debug("processSelectedKey(...) : AbstractNioChannel.NioUnsafe unsafe = ch.unsafe() : {}" , unsafe);
         if (!k.isValid()) {
             final EventLoop eventLoop;
             try {
@@ -695,6 +711,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
         try {
             int readyOps = k.readyOps();
+
+            if(readyOps == SelectionKey.OP_ACCEPT){
+                logger.debug("processSelectedKey(...) : int readyOps = k.readyOps() : {} , SelectionKey.OP_ACCEPT" , readyOps);
+            }else if(readyOps == SelectionKey.OP_READ){
+                logger.debug("processSelectedKey(...) : int readyOps = k.readyOps() : {} , SelectionKey.OP_READ" , readyOps);
+            }else if(readyOps == SelectionKey.OP_WRITE){
+                logger.debug("processSelectedKey(...) : int readyOps = k.readyOps() : {} , SelectionKey.OP_WRITE" , readyOps);
+            }else if(readyOps == SelectionKey.OP_CONNECT){
+                logger.debug("processSelectedKey(...) : int readyOps = k.readyOps() : {} , SelectionKey.OP_CONNECT" , readyOps);
+            }
+
             // We first need to call finishConnect() before try to trigger a read(...) or write(...) as otherwise
             // the NIO JDK channel implementation may throw a NotYetConnectedException.
             if ((readyOps & SelectionKey.OP_CONNECT) != 0) {
@@ -716,6 +743,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+                logger.debug("processSelectedKey(...) : to invoke unsafe.read() , unsafe : {}" , unsafe);
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {

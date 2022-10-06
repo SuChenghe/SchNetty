@@ -1,6 +1,5 @@
 package com.suchenghe.study.example_AttributeKey;
 
-import com.suchenghe.study.example_simple.SchSimpleInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;

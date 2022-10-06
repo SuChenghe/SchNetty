@@ -1,4 +1,4 @@
-package com.suchenghe.study.example_simple;
+package com.suchenghe.example_simple;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;

@@ -16,6 +16,7 @@
 package io.netty.channel;
 
 import io.netty.channel.Channel.Unsafe;
+import io.netty.channel.nio.NioEventLoop;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutor;
@@ -1477,6 +1478,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         void execute() {
             EventExecutor executor = ctx.executor();
+            logger.debug("PendingHandlerAddedTask execute() start to invoke : executor : {} ,thread : {}"
+                    , executor ,Thread.currentThread().getName());
             if (executor.inEventLoop()) {
                 callHandlerAdded0(ctx);
             } else {

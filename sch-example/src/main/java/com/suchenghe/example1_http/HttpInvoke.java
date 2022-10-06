@@ -1,4 +1,4 @@
-package com.suchenghe.study.example1_http;
+package com.suchenghe.example1_http;
 
 import java.io.BufferedReader;
 import java.io.IOException;

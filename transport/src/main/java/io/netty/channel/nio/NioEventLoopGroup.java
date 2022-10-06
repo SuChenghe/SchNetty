@@ -15,12 +15,7 @@
  */
 package io.netty.channel.nio;
 
-import io.netty.channel.Channel;
-import io.netty.channel.EventLoop;
-import io.netty.channel.DefaultSelectStrategyFactory;
-import io.netty.channel.EventLoopTaskQueueFactory;
-import io.netty.channel.MultithreadEventLoopGroup;
-import io.netty.channel.SelectStrategyFactory;
+import io.netty.channel.*;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.EventExecutorChooserFactory;
 import io.netty.util.concurrent.RejectedExecutionHandler;
@@ -98,6 +93,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     public NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,
                              final SelectStrategyFactory selectStrategyFactory) {
         super(nThreads, executor, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());
+        logger.debug("NioEventLoopGroup 实例化完成");
     }
 
     public NioEventLoopGroup(int nThreads, Executor executor, EventExecutorChooserFactory chooserFactory,
@@ -146,9 +142,15 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
         EventLoopTaskQueueFactory queueFactory = args.length == 4 ? (EventLoopTaskQueueFactory) args[3] : null;
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : NioEventLoopGroup parent : {} " , this);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : Executor executor : {} " , executor);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : SelectorProvider selectorProvider : {} " , args[0]);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : SelectStrategyFactory strategyFactory : {} " , args[1]);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : RejectedExecutionHandler rejectedExecutionHandler : {} " , args[2]);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : EventLoopTaskQueueFactory queueFactory : {} " , queueFactory);
         NioEventLoop nioEventLoop = new NioEventLoop(this, executor, (SelectorProvider) args[0],
             ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2], queueFactory);
-        logger.debug(" new NioEventLoop() : {}" , nioEventLoop);
+        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : result : {}", nioEventLoop);
         return nioEventLoop;
     }
 }

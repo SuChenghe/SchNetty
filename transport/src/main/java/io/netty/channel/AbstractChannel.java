@@ -19,6 +19,8 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.nio.AbstractNioChannel;
 import io.netty.channel.socket.ChannelOutputShutdownEvent;
 import io.netty.channel.socket.ChannelOutputShutdownException;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.DefaultAttributeMap;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.ObjectUtil;
@@ -70,7 +72,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
-        logger.debug("protected AbstractChannel(Channel parent) {...} : 开始执行，主要是为创建一个AbstractChannel");
+        logger.debug("protected AbstractChannel(Channel parent) start to invoke : parent : {}",parent);
         this.parent = parent;
         id = newId();
         logger.debug("AbstractChannel(Channel parent) : Channel id created : {}" , id);
@@ -78,15 +80,30 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 1、newUnsafe() 方法在AbstractChannel类中定义为 —> {}" , "AbstractChannel -> protected abstract AbstractUnsafe newUnsafe()");
         logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 1、AbstractUnsafe类 在AbstractChannel类中定义为 -> {}" , "protected abstract class AbstractUnsafe implements Unsafe");
 
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel extends AbstractNioMessageChannel extends AbstractNioChannel extend AbstractChannel");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel 继承了 AbstractNioMessageChannel , 所以实际调用的是 AbstractNioMessageChannel 重写的父类方法 -> {}",
-                "\n  AbstractNioMessageChannel 类中定义 : \n" +
-                "    @Override\n" +
-                "    protected AbstractNioUnsafe newUnsafe() {\n" +
-                "        return new NioSocketChannelUnsafe();\n" +
-                "    }");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、AbstractNioUnsafe类 定义为 : -> {}" , "protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe");
-        logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() 在 AbstractNioMessageChannel 中的定义为 : -> {}" , "private final class NioMessageUnsafe extends AbstractNioUnsafe");
+        if(this instanceof NioServerSocketChannel){
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel extends AbstractNioMessageChannel extends AbstractNioChannel extend AbstractChannel");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel 继承了 AbstractNioMessageChannel , 所以实际调用的是 AbstractNioMessageChannel 重写的父类方法 -> {}",
+                    "\n  AbstractNioMessageChannel 类中定义 : \n" +
+                            "    @Override\n" +
+                            "    protected AbstractNioUnsafe newUnsafe() {\n" +
+                            "        return new NioSocketChannelUnsafe();\n" +
+                            "    }");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、AbstractNioUnsafe类 定义为 : -> {}" , "protected abstract class AbstractNioUnsafe extends AbstractUnsafe");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() 在 AbstractNioMessageChannel 中的定义为 : -> {}" , "private final class NioMessageUnsafe extends AbstractNioUnsafe");
+        }else if(this instanceof NioSocketChannel){
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioSocketChannel extends AbstractNioByteChannel extends AbstractNioChannel extends AbstractChannel");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioSocketChannel 重写了该方法 : {}",
+                    "\n  NioSocketChannel 类: \n" +
+                            "    @Override\n" +
+                            "    protected AbstractNioUnsafe newUnsafe() {\n" +
+                            "        return new NioSocketChannelUnsafe();\n" +
+                            "    }");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() 在 NioSocketChannel 中的定义为 : -> {}" , "private final class NioSocketChannelUnsafe extends NioByteUnsafe");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioByteUnsafe类 定义为 : -> {}" ,
+                    "protected class NioByteUnsafe(属于AbstractNioByteChannel类)" +
+                            "extends AbstractNioUnsafe(属于AbstractNioChannel类) " +
+                            "extends AbstractUnsafe(属于AbstractChannel类) ");
+        }
 
         logger.debug("AbstractChannel(Channel parent) : newChannelPipeline() 调用开始 : {} " ,
                 "\n  AbstractChannel类中定义为\n" +
@@ -506,7 +523,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
-                            logger.debug("eventLoop.execute register0,eventLoop : {}",eventLoop);
+                            logger.debug("eventLoop.execute register0 , eventLoop : {} , bind thread : {}" , eventLoop ,
+                                    Thread.currentThread().getName());
                             register0(promise);
                         }
                     });
@@ -529,20 +547,24 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
+                logger.debug("register0(ChannelPromise promise) : doRegister() start to invoke");
                 doRegister();
                 neverRegistered = false;
                 registered = true;
 
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
+                logger.debug("register0(ChannelPromise promise) : pipeline.invokeHandlerAddedIfNeeded()");
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);
+                logger.debug("register0(ChannelPromise promise) : pipeline.fireChannelRegistered()");
                 pipeline.fireChannelRegistered();
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
                     if (firstRegistration) {
+                        logger.debug("register0(ChannelPromise promise) : pipeline.fireChannelActive()");
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
                         // This channel was registered before and autoRead() is set. This means we need to begin read

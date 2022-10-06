@@ -387,6 +387,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+        logger.debug("PooledByteBufAllocator : protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) start to invoke");
         PoolThreadCache cache = threadCache.get();
         PoolArena<ByteBuffer> directArena = cache.directArena;
 

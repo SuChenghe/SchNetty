@@ -150,7 +150,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
+                    logger.debug("将ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
                     pipeline.addLast(handler);
+                    logger.debug("将ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
                 }
 
                 ch.eventLoop().execute(new Runnable() {
@@ -162,9 +164,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 });
             }
         };
-        logger.debug("将ChannelInitializer 添加到 Channel 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
+        logger.debug("将ChannelInitializer 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
         p.addLast(channelInitializer);
-        logger.debug("将ChannelInitializer 添加到 Channel 的尾部 , 添加完成 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
+        logger.debug("将ChannelInitializer 添加到 ChannelPipeline 的尾部 , 添加完成 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
     }
 
     @Override
@@ -212,14 +214,21 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            logger.debug("ServerBootstrapAcceptor start to invoke channelRead(ChannelHandlerContext ctx, Object msg)");
+            logger.debug("ServerBootstrapAcceptor : ctx : {}, msg : {}",ctx,msg);
             final Channel child = (Channel) msg;
 
+            logger.debug("");
+            logger.debug("ServerBootstrapAcceptor : child.pipeline().addLast(childHandler) start to invoke");
             child.pipeline().addLast(childHandler);
+            logger.debug("ServerBootstrapAcceptor : child.pipeline().addLast(childHandler) complete");
+            logger.debug("");
 
             setChannelOptions(child, childOptions, logger);
             setAttributes(child, childAttrs);
 
             try {
+                logger.debug("ServerBootstrapAcceptor : childGroup.register(child)");
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {

@@ -75,13 +75,20 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      */
     protected MultithreadEventExecutorGroup(int nThreads, Executor executor,
                                             EventExecutorChooserFactory chooserFactory, Object... args) {
+        logger.debug("NioEventLoopGroup 开始实例化");
 
-        logger.debug("NioEventLoopGroup  参数定义 : SelectorProvider selectorProvider : SelectorProvider.provider()");
-        logger.debug("NioEventLoopGroup  参数定义 : SelectStrategyFactory selectStrategyFactory : DefaultSelectStrategyFactory.INSTANCE");
-        logger.debug("MultithreadEventLoopGroup 参数定义 : nThreads : DEFAULT_EVENT_LOOP_THREADS : {}",nThreads);
-        logger.debug("MultithreadEventExecutorGroup 参数定义 : EventExecutorChooserFactory chooserFactory :" +
-                        " DefaultEventExecutorChooserFactory.INSTANCE : {}",chooserFactory);
+        logger.debug("NioEventLoopGroup : SelectorProvider selectorProvider , 定义 : SelectorProvider.provider()");
+        logger.debug("NioEventLoopGroup : SelectorProvider selectorProvider , 值 : {}",args[0]);
+        logger.debug("NioEventLoopGroup : SelectStrategyFactory selectStrategyFactory 定义: DefaultSelectStrategyFactory.INSTANCE");
+        logger.debug("NioEventLoopGroup : SelectStrategyFactory selectStrategyFactory 值 : {}",args[1]);
+        logger.debug("NioEventLoopGroup : RejectedExecutionHandler 定义: RejectedExecutionHandlers.reject()");
+        logger.debug("NioEventLoopGroup : RejectedExecutionHandler 值 : {}",args[2]);
 
+        logger.debug("NioEventLoopGroup 继承关系 : NioEventLoopGroup extends MultithreadEventLoopGroup extends MultithreadEventExecutorGroup");
+        logger.debug("MultithreadEventLoopGroup : nThreads , 定义 : DEFAULT_EVENT_LOOP_THREADS , 值 : {}",nThreads);
+        logger.debug("MultithreadEventExecutorGroup : EventExecutorChooserFactory chooserFactory , 定义 : " +
+                        " DefaultEventExecutorChooserFactory.INSTANCE ");
+        logger.debug("MultithreadEventExecutorGroup : EventExecutorChooserFactory chooserFactory , 值 : {}",chooserFactory);
         logger.debug("MultithreadEventExecutorGroup(int nThreads, Executor executor, EventExecutorChooserFactory chooserFactory, " +
                 "Object... args) 构造函数开始执行");
 
@@ -89,8 +96,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
         if (executor == null) {
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
-            logger.debug("MultithreadEventExecutorGroup(...) : Executor executor is null ,to new A ThreadPerTaskExecutor(newDefaultThreadFactory()) : "
-                    , executor);
+            logger.debug("MultithreadEventExecutorGroup(...) : Executor executor is null ,to new A ThreadPerTaskExecutor(newDefaultThreadFactory())");
+            logger.debug("MultithreadEventExecutorGroup(...) : Executor executor , 值 : {}", executor);
         }
 
         logger.debug("MultithreadEventExecutorGroup(...) : init EventExecutor[] children , children = new EventExecutor[nThreads]; nThreads : {}",nThreads);
@@ -128,7 +135,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         }
 
         chooser = chooserFactory.newChooser(children);
-        logger.debug("EventExecutor[] length : {} , EventExecutorChooserFactory : {} , chooser : {}" , children.length , chooserFactory , chooser);
+        logger.debug("MultithreadEventExecutorGroup(...) : EventExecutor[] length : {} " , children.length);
+        logger.debug("MultithreadEventExecutorGroup(...) : EventExecutorChooserFactory : {} , chooser : {}" , chooserFactory , chooser);
 
         final FutureListener<Object> terminationListener = new FutureListener<Object>() {
             @Override
@@ -154,8 +162,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
     @Override
     public EventExecutor next() {
+        logger.debug("MultithreadEventExecutorGroup next() : 方法实现为 : {}" , "EventExecutor eventExecutor = chooser.next();");
         EventExecutor eventExecutor = chooser.next();
-        logger.debug("MultithreadEventExecutorGroup : {} , 执行 next() ,选择的 EventExecutor为 : {}",this , eventExecutor);
+        logger.debug("MultithreadEventExecutorGroup next() : chooser : {} ,选择的 EventExecutor为 : {}",this , chooser,  eventExecutor);
         return eventExecutor;
     }
 
