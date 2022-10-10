@@ -164,7 +164,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     public EventExecutor next() {
         logger.debug("MultithreadEventExecutorGroup next() : 方法实现为 : {}" , "EventExecutor eventExecutor = chooser.next();");
         EventExecutor eventExecutor = chooser.next();
-        logger.debug("MultithreadEventExecutorGroup next() : chooser : {} ,选择的 EventExecutor为 : {}",this , chooser,  eventExecutor);
+        logger.debug("MultithreadEventExecutorGroup next() : chooser : {} ,选择的 EventExecutor为 : {}" , chooser,  eventExecutor);
         return eventExecutor;
     }
 

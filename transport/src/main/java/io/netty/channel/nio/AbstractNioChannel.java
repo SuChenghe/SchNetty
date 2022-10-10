@@ -417,6 +417,19 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
         readPending = true;
 
+        String readInterestOpValue = null;
+        if(readInterestOp == SelectionKey.OP_ACCEPT){
+            readInterestOpValue = readInterestOp + ":SelectionKey.OP_ACCEPT";
+        }else{
+            readInterestOpValue = String.valueOf(readInterestOp);
+        }
+        logger.debug("AbstractNioChannel : 设置监听事件\n" +
+                "   final int interestOps = selectionKey.interestOps();\n" +
+                "   if ((interestOps & readInterestOp) == 0) {\n" +
+                "      selectionKey.interestOps(interestOps | readInterestOp);\n" +
+                "   }" +
+                "   readInterestOp : {}",readInterestOpValue);
+
         final int interestOps = selectionKey.interestOps();
         if ((interestOps & readInterestOp) == 0) {
             selectionKey.interestOps(interestOps | readInterestOp);

@@ -388,6 +388,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
         logger.debug("PooledByteBufAllocator : protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) start to invoke");
+        logger.debug("...newDirectBuffer(...) : threadCache.get() : private final PoolThreadLocalCache threadCache : {}" ,threadCache);
         PoolThreadCache cache = threadCache.get();
         PoolArena<ByteBuffer> directArena = cache.directArena;
 
@@ -507,11 +508,21 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         @Override
         protected synchronized PoolThreadCache initialValue() {
+            logger.info("final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache>");
+            logger.info("PoolThreadLocalCache : initialValue()");
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
+            logger.info("PoolThreadLocalCache : initialValue() : PoolArena<byte[]> heapArena , heapArenas : {}",heapArena);
+            logger.info("PoolThreadLocalCache : initialValue() : PoolArena<ByteBuffer> directArena , directArenas : {}",directArenas);
 
             final Thread current = Thread.currentThread();
             if (useCacheForAllThreads || current instanceof FastThreadLocalThread) {
+                logger.info("PoolThreadLocalCache : initialValue() : new PoolThreadCache(\n" +
+                        "                        heapArena, directArena, smallCacheSize, normalCacheSize,\n" +
+                        "                        DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL)");
+                logger.info("PoolThreadLocalCache : initialValue() : smallCacheSize : {} , normalCacheSize : {} , " +
+                                "DEFAULT_MAX_CACHED_BUFFER_CAPACITY : {} , DEFAULT_CACHE_TRIM_INTERVAL : {}",
+                        smallCacheSize,normalCacheSize,DEFAULT_MAX_CACHED_BUFFER_CAPACITY,DEFAULT_CACHE_TRIM_INTERVAL);
                 final PoolThreadCache cache = new PoolThreadCache(
                         heapArena, directArena, smallCacheSize, normalCacheSize,
                         DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);

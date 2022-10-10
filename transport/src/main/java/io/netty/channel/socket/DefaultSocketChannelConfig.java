@@ -24,6 +24,8 @@ import io.netty.channel.RecvByteBufAllocator;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.Socket;
 import java.net.SocketException;
@@ -36,6 +38,8 @@ import static io.netty.channel.ChannelOption.*;
  */
 public class DefaultSocketChannelConfig extends DefaultChannelConfig
                                         implements SocketChannelConfig {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultSocketChannelConfig.class);
 
     protected final Socket javaSocket;
     private volatile boolean allowHalfClosure;
@@ -50,6 +54,8 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
         // Enable TCP_NODELAY by default if possible.
         if (PlatformDependent.canEnableTcpNoDelayByDefault()) {
             try {
+                logger.debug("public DefaultSocketChannelConfig(SocketChannel channel, Socket javaSocket) : " +
+                        "this.javaSocket set setTcpNoDelay(true)");
                 setTcpNoDelay(true);
             } catch (Exception e) {
                 // Ignore.

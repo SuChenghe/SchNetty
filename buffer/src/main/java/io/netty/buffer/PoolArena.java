@@ -19,6 +19,8 @@ package io.netty.buffer;
 import io.netty.util.internal.LongCounter;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,6 +32,9 @@ import static io.netty.buffer.PoolChunk.isSubpage;
 import static java.lang.Math.max;
 
 abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolArena.class);
+
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
     enum SizeClass {
@@ -128,16 +133,27 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     }
 
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
+
+        logger.debug("PoolArena : allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) start to invoke");
+
         final int sizeIdx = size2SizeIdx(reqCapacity);
 
+        logger.debug("PoolArena : allocate(...) : final int sizeIdx = size2SizeIdx(reqCapacity) :" +
+                " reqCapacity : {} , sizeIdx : {}",reqCapacity,sizeIdx);
+
         if (sizeIdx <= smallMaxSizeIdx) {
+            logger.debug("PoolArena : allocate(...) : sizeIdx <= smallMaxSizeIdx :" +
+                    " tcacheAllocateSmall(cache, buf, reqCapacity, sizeIdx); smallMaxSizeIdx : {}",smallMaxSizeIdx);
             tcacheAllocateSmall(cache, buf, reqCapacity, sizeIdx);
         } else if (sizeIdx < nSizes) {
+            logger.debug("PoolArena : allocate(...) : sizeIdx < nSizes :" +
+                    " tcacheAllocateNormal(cache, buf, reqCapacity, sizeIdx); nSizes : {}",nSizes);
             tcacheAllocateNormal(cache, buf, reqCapacity, sizeIdx);
         } else {
             int normCapacity = directMemoryCacheAlignment > 0
                     ? normalizeSize(reqCapacity) : reqCapacity;
             // Huge allocations are never served via the cache so just call allocateHuge
+            logger.debug("PoolArena : allocate(...) : allocateHuge(buf, normCapacity): normCapacity : {}" , normCapacity);
             allocateHuge(buf, normCapacity);
         }
     }

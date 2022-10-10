@@ -663,6 +663,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             firstRegistration = false;
             // We are now registered to the EventLoop. It's time to call the callbacks for the ChannelHandlers,
             // that were added before the registration was done.
+            logger.debug("invokeHandlerAddedIfNeeded() : callHandlerAddedForAllHandlers() start to invoke");
             callHandlerAddedForAllHandlers();
         }
     }
@@ -1017,6 +1018,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline read() {
+        logger.debug("DefaultChannelPipeline : public final ChannelPipeline read() start to read : this : {}" , this);
+        logger.debug("DefaultChannelPipeline : public final ChannelPipeline read() : tail.read() , tail : {}" , tail);
         tail.read();
         return this;
     }
@@ -1128,6 +1131,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         // the EventLoop.
         PendingHandlerCallback task = pendingHandlerCallbackHead;
         while (task != null) {
+            logger.debug("PendingHandlerCallback task.execute()");
             task.execute();
             task = task.next;
         }
@@ -1141,14 +1145,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
             pendingHandlerCallbackHead = task;
-            logger.debug("Set the PendingHandlerCallback : {} to PendingHandlerCallbackHead",task);
+            logger.debug("private PendingHandlerCallback pendingHandlerCallbackHead is null");
+            logger.debug("Set the PendingHandlerCallback : {} to PendingHandlerCallbackHead" , task);
         } else {
+            logger.debug("private PendingHandlerCallback pendingHandlerCallbackHead is not null : {}" , pending);
             // Find the tail of the linked-list.
             while (pending.next != null) {
                 pending = pending.next;
             }
             pending.next = task;
-            logger.debug("Set the PendingHandlerCallback : {} to The Last PendingHandlerCallback's next :{} ",task,pending);
+            logger.debug("Set the PendingHandlerCallback : {} to the tail of the linked-list" , task);
         }
     }
 
@@ -1350,6 +1356,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         public void bind(
                 ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise promise) {
+            logger.debug("HeadContext : bind(ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise promise) start to invoke");
+            logger.debug("HeadContext : unsafe.bind(localAddress, promise) : HeadContext : {} ,unsafe : {} , localAddress : {}",
+                    this, unsafe , localAddress);
             unsafe.bind(localAddress, promise);
         }
 
@@ -1378,6 +1387,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void read(ChannelHandlerContext ctx) {
+            logger.debug("HeadContext : public void read(ChannelHandlerContext ctx) start to invoke");
+            logger.debug("HeadContext : public void read(ChannelHandlerContext ctx) : unsafe.beginRead() ," +
+                    "unsafe : {}" , unsafe);
             unsafe.beginRead();
         }
 
@@ -1414,8 +1426,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
+            logger.debug("HeadContext : channelActive(ChannelHandlerContext ctx) start to invoke");
+            logger.debug("HeadContext : channelActive(ChannelHandlerContext ctx) : ctx.fireChannelActive();");
             ctx.fireChannelActive();
-
+            logger.debug("HeadContext : channelActive(ChannelHandlerContext ctx) : readIfIsAutoRead()");
             readIfIsAutoRead();
         }
 

@@ -58,7 +58,8 @@ public final class ThreadExecutorMap {
         return new Executor() {
             @Override
             public void execute(final Runnable command) {
-                logger.debug("this : {} 's Executor, 开始执行 ", this );
+                logger.debug("ThreadPerTaskExecutor : executor.execute(apply(command, eventExecutor)); start to invoke");
+                logger.debug("ThreadPerTaskExecutor : executor : {}", executor);
                 executor.execute(apply(command, eventExecutor));
             }
         };
@@ -74,10 +75,12 @@ public final class ThreadExecutorMap {
         return new Runnable() {
             @Override
             public void run() {
+                logger.debug("setCurrentEventExecutor(eventExecutor); -> mappings.set(executor); " +
+                                "executor : {} , Thread : {}" , eventExecutor , Thread.currentThread().getName());
+                logger.debug("private static final FastThreadLocal<EventExecutor> mappings = new FastThreadLocal<EventExecutor>();");
                 setCurrentEventExecutor(eventExecutor);
-                logger.debug("set Current EventExecutor to Current Thread , eventExecutor : {} , Thread : {}"
-                        , eventExecutor , Thread.currentThread().getName());
                 try {
+                    logger.debug("command.run()；command : {} " , command);
                     command.run();
                 } finally {
                     setCurrentEventExecutor(null);

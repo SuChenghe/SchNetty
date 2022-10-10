@@ -83,13 +83,17 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         if(this instanceof NioServerSocketChannel){
             logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel extends AbstractNioMessageChannel extends AbstractNioChannel extend AbstractChannel");
             logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioServerSocketChannel 继承了 AbstractNioMessageChannel , 所以实际调用的是 AbstractNioMessageChannel 重写的父类方法 -> {}",
-                    "\n  AbstractNioMessageChannel 类中定义 : \n" +
+                    "\n     AbstractNioMessageChannel 类中定义 : \n" +
                             "    @Override\n" +
                             "    protected AbstractNioUnsafe newUnsafe() {\n" +
                             "        return new NioSocketChannelUnsafe();\n" +
                             "    }");
-            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、AbstractNioUnsafe类 定义为 : -> {}" , "protected abstract class AbstractNioUnsafe extends AbstractUnsafe");
-            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() 在 AbstractNioMessageChannel 中的定义为 : -> {}" , "private final class NioMessageUnsafe extends AbstractNioUnsafe");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、AbstractNioUnsafe类 " +
+                            "在AbstractNioChannel类中 定义为 : -> {}" ,
+                    "protected abstract class AbstractNioUnsafe extends AbstractUnsafe");
+            logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 3、NioSocketChannelUnsafe() " +
+                    "在 AbstractNioMessageChannel 中的定义为 : -> {}" ,
+                    "private final class NioMessageUnsafe extends AbstractNioUnsafe");
         }else if(this instanceof NioSocketChannel){
             logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioSocketChannel extends AbstractNioByteChannel extends AbstractNioChannel extends AbstractChannel");
             logger.debug("AbstractChannel(Channel parent) : newUnsafe() 调用 : 2、NioSocketChannel 重写了该方法 : {}",
@@ -327,6 +331,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     @Override
     public Channel read() {
+        logger.debug("AbstractChannel : public Channel read() start to invoke : this : {}",this);
         pipeline.read();
         return this;
     }
@@ -503,6 +508,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
+            logger.debug("AbstractUnsafe register(EventLoop eventLoop, final ChannelPromise promise) start to invoke");
             ObjectUtil.checkNotNull(eventLoop, "eventLoop");
             if (isRegistered()) {
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
@@ -517,9 +523,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             AbstractChannel.this.eventLoop = eventLoop;
 
             if (eventLoop.inEventLoop()) {
+                logger.debug("eventLoop.inEventLoop() : true ，执行 register0(promise)");
                 register0(promise);
             } else {
                 try {
+                    logger.debug("eventLoop.execute(new Runnable(register0(promise))");
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -541,14 +549,17 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         private void register0(ChannelPromise promise) {
             try {
+                logger.debug("register0(ChannelPromise promise) : start to invoke");
                 // check if the channel is still open as it could be closed in the mean time when the register
                 // call was outside of the eventLoop
                 if (!promise.setUncancellable() || !ensureOpen(promise)) {
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
-                logger.debug("register0(ChannelPromise promise) : doRegister() start to invoke");
+                logger.debug("register0(ChannelPromise promise) : doRegister() 开始执行");
+                logger.debug("register0(ChannelPromise promise) : doRegister() 主要是将JDK底层的Channel注册到EventLoop关联的Selector上面");
                 doRegister();
+                logger.debug("register0(ChannelPromise promise) : doRegister() 结束执行");
                 neverRegistered = false;
                 registered = true;
 
@@ -605,6 +616,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
+                logger.debug("AbstractUnsafe : bind(final SocketAddress localAddress, final ChannelPromise promise) start to invoke " +
+                                ", this : {} " , this);
+                logger.debug("AbstractUnsafe : bind(...) : doBind(localAddress) : localAddress : {}" , localAddress);
                 doBind(localAddress);
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
@@ -616,6 +630,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 invokeLater(new Runnable() {
                     @Override
                     public void run() {
+                        logger.debug("pipeline.fireChannelActive()");
                         pipeline.fireChannelActive();
                     }
                 });
@@ -899,6 +914,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
+                logger.debug("AbstractUnsafe : doBeginRead() start to invoke , this : {} " , this);
                 doBeginRead();
             } catch (final Exception e) {
                 invokeLater(new Runnable() {

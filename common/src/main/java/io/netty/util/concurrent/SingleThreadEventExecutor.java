@@ -285,11 +285,17 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
         long nanoTime = AbstractScheduledEventExecutor.nanoTime();
         for (;;) {
+            logger.debug("PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue : pollScheduledTask(nanoTime) : " +
+                    "scheduledTaskQueue : {} ,nanoTime : {}" , scheduledTaskQueue , nanoTime);
             Runnable scheduledTask = pollScheduledTask(nanoTime);
             if (scheduledTask == null) {
                 return true;
             }
-            if (!taskQueue.offer(scheduledTask)) {
+            //if (!taskQueue.offer(scheduledTask)) {
+            boolean booleanState = taskQueue.offer(scheduledTask);
+            logger.debug("Queue<Runnable> taskQueue.offer(scheduledTask) : taskQueue : {} , scheduledTask : {}",
+                    taskQueue,scheduledTask);
+            if (!booleanState) {
                 // No space left in the task queue add it back to the scheduledTaskQueue so we pick it up again.
                 scheduledTaskQueue.add((ScheduledFutureTask<?>) scheduledTask);
                 return false;
@@ -469,10 +475,13 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             return false;
         }
 
+        logger.debug("Runnable task = pollTask() : task : {} ", task);
+
         final long deadline = timeoutNanos > 0 ? ScheduledFutureTask.nanoTime() + timeoutNanos : 0;
         long runTasks = 0;
         long lastExecutionTime;
         for (;;) {
+            logger.debug("safeExecute(task) : task : {} ", task);
             safeExecute(task);
 
             runTasks ++;
@@ -490,6 +499,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             if (task == null) {
                 lastExecutionTime = ScheduledFutureTask.nanoTime();
                 break;
+            }else{
+                logger.debug("Runnable task = pollTask() : task : {} ", task);
             }
         }
 
@@ -819,6 +830,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     @Override
     public void execute(Runnable task) {
         ObjectUtil.checkNotNull(task, "task");
+        logger.debug("SingleThreadEventExecutor : execute(Runnable task) start to invoke");
         execute(task, !(task instanceof LazyRunnable) && wakesUpForTask(task));
     }
 
@@ -828,9 +840,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     private void execute(Runnable task, boolean immediate) {
-        logger.debug("SingleThreadEventExecutor start to execute(Runnable task, boolean immediate) : this : {}",this);
+        logger.debug("SingleThreadEventExecutor : execute(Runnable task, boolean immediate) start to invoke : this : {} " , this);
         boolean inEventLoop = inEventLoop();
         addTask(task);
+        logger.debug("SingleThreadEventExecutor : execute(Runnable task, boolean immediate) : addTask(task): task : {} , this : {}" , task ,this);
         if (!inEventLoop) {
             startThread();
             if (isShutdown()) {
@@ -992,6 +1005,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 boolean success = false;
                 updateLastExecutionTime();
                 try {
+                    logger.debug("SingleThreadEventExecutor.this.run()");
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {

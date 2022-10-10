@@ -150,20 +150,25 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
-                    logger.debug("将ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
+                    logger.debug("将用户设置的ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
                     pipeline.addLast(handler);
-                    logger.debug("将ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
+                    logger.debug("将用户设置的ChannelHandler 添加到 ChannelPipeline 的尾部 , 添加完成 , Channel : {} , ChannelPipeline : {} , handler : {}", channel , p , handler);
                 }
+
+                logger.debug(" ch.eventLoop().execute(new Runnable(pipeline.addLast(new ServerBootstrapAcceptor(...)...); 开始执行");
 
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
+                        logger.debug("将ServerBootstrapAcceptor 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} ", channel , p );
                         pipeline.addLast(new ServerBootstrapAcceptor(
                                 ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));
+                        logger.debug("将ServerBootstrapAcceptor 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} ", channel , p);
                     }
                 });
             }
         };
+        logger.debug("定义一个ChannelInitializer,里面主要是将用户设置的ChannelHandler添加到pipeline,并且以任务形式ch.eventLoop().execute(...),添加一个ServerBootstrapAcceptor到pipeline");
         logger.debug("将ChannelInitializer 添加到 ChannelPipeline 的尾部 , 添加开始 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);
         p.addLast(channelInitializer);
         logger.debug("将ChannelInitializer 添加到 ChannelPipeline 的尾部 , 添加完成 , Channel : {} , ChannelPipeline : {} , ChannelInitializer : {}", channel , p , channelInitializer);

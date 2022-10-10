@@ -272,22 +272,23 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
-        logger.debug("start to init and register channel");
+        logger.debug("doBind(final SocketAddress localAddress) : ChannelFuture regFuture = initAndRegister() start to invoke ," +
+                " localAddress : {}" , localAddress);
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
             return regFuture;
         }
-        logger.debug("init and register channel success");
+        logger.debug("initAndRegister() : invoke success , regFuture.cause() == null");
 
         if (regFuture.isDone()) {
-            logger.info("ChannelFuture regFuture is Done");
+            logger.info("regFuture : is Done");
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
-            logger.debug("ChannelFuture regFuture is not Done");
+            logger.debug("regFuture : is not Done");
             // Registration future is almost always fulfilled already, but just in case it's not.
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
             regFuture.addListener(new ChannelFutureListener() {
@@ -317,20 +318,15 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         Channel channel = null;
         try {
             logger.debug("");
-            logger.debug("++++++");
             logger.debug("NioServerSocketChannel 开始实例化");
             logger.debug("从 ChannelFactory:{} ,调用newChannel() 进行Channel的构造" ,channelFactory);
             channel = channelFactory.newChannel();
             logger.debug("NioServerSocketChannel 实例化成功 : {}",channel);
-            logger.debug("++++++");
 
             logger.debug("");
-            logger.debug("++++++");
             logger.debug("NioServerSocketChannel 开始初始化(start to init) : {}",channel);
             init(channel);
             logger.debug("NioServerSocketChannel 初始化结束(init end) : {}",channel);
-            logger.debug("++++++");
-            logger.debug("");
         } catch (Throwable t) {
             if (channel != null) {
                 // channel can be null if newChannel crashed (eg SocketException("too many open files"))
@@ -343,28 +339,34 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
 
         logger.debug("");
-        logger.debug("++++++");
-        logger.debug("NioServerSocketChannel 开始注册 , 执行方法为 : {}","ChannelFuture regFuture = config().group().register(channel);");
+        logger.debug("NioServerSocketChannel 注册代码开始-main线程 , 执行方法为 : {}","ChannelFuture regFuture = config().group().register(channel);");
         EventLoopGroup eventLoopGroup = config().group();
         logger.debug("NioServerSocketChannel 注册 : config().group() , 即 EventLoopGroup为 : {}",eventLoopGroup);
-        logger.debug("NioServerSocketChannel 注册 : MultithreadEventLoopGroup register(channel) 的方法实现为 : " +
-                "\n  MultithreadEventLoopGroup 类 : " +
+        logger.debug("NioServerSocketChannel 注册 : MultithreadEventLoopGroup register(channel) 的方法实现为 : \n" +
+                "    MultithreadEventLoopGroup 类 : \n" +
                 "    @Override\n" +
                 "    public ChannelFuture register(Channel channel) {\n" +
                 "        return next().register(channel);\n" +
-                "    }" +
-                "    " +
+                "    }\n" +
                 "    @Override\n" +
                 "    public EventLoop next() {\n" +
                 "        return (EventLoop) super.next();\n" +
+                "    }\n" +
+                "    MultithreadEventLoopGroup extends MultithreadEventExecutorGroup" +
+                "    MultithreadEventExecutorGroup 类\n" +
+                "    @Override\n" +
+                "    public EventExecutor next() {\n" +
+                "        EventExecutor eventExecutor = chooser.next();\n" +
+                "        return eventExecutor;\n" +
                 "    }" +
-                " ");
-        logger.debug("NioServerSocketChannel 注册 : MultithreadEventLoopGroup extends MultithreadEventExecutorGroup");
+                "    chooser : PowerOfTwoEventExecutorChooser -> executors[idx.getAndIncrement() & executors.length - 1];" +
+                "    chooser : GenericEventExecutorChooser -> executors[(int) Math.abs(idx.getAndIncrement() % executors.length)];" +
+                "    ");
 
-
-
-
+        logger.debug("NioServerSocketChannel 注册代码-main线程 : 从NioEventLoopGroup选择一个NioEventLoop,去执行注册操作,主要是将NioServerSocketChannel" +
+                "关联的底层JDK的Channel，注册到NioEventLoop声明的Selector上");
         ChannelFuture regFuture = eventLoopGroup.register(channel);
+        logger.debug("NioServerSocketChannel 注册代码结束-main线程");
 
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
@@ -373,8 +375,6 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                 channel.unsafe().closeForcibly();
             }
         }
-        logger.debug("NioServerSocketChannel 注册完成");
-        logger.debug("++++++");
         logger.debug("");
 
         // If we are here and the promise is not failed, it's one of the following cases:
@@ -397,6 +397,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        logger.debug("channel.eventLoop().execute(new Runnable(执行doBind0...))");
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
@@ -405,14 +406,14 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                     logger.debug("doBind0 执行 channel.bind(localAddress, promise) , channel : {}",channel);
                     logger.debug("doBind0 执行 : AbstractChannel extend Channel extend ChannelOutboundInvoker");
                     logger.debug("doBind0 执行 : ChannelOutboundInvoker 中定义了接口方法 -> ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise);");
-                    logger.debug("doBind0 执行 : 抽象类 AbstractChannel 进行了实现 ：—> " +
-                            "\n    AbstractChannel\n" +
+                    logger.debug("doBind0 执行 : 抽象类 AbstractChannel 进行了实现 ：—> \n" +
+                            "    AbstractChannel\n" +
                             "    @Override\n" +
                             "    public ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {\n" +
                             "        return pipeline.bind(localAddress, promise);\n" +
                             "    }");
-                    logger.debug("doBind0 执行 : DefaultChannelPipeline 方法实现为 ：—>" +
-                            "\n  DefaultChannelPipeline\n" +
+                    logger.debug("doBind0 执行 : DefaultChannelPipeline 方法实现为 ：—>\n" +
+                            "    DefaultChannelPipeline\n" +
                             "    @Override\n" +
                             "    public final ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {\n" +
                             "        return tail.bind(localAddress, promise);\n" +

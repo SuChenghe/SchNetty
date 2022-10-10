@@ -61,6 +61,9 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
     }
 
     protected boolean continueReading(RecvByteBufAllocator.Handle allocHandle) {
+        logger.debug("AbstractNioMessageChannel : continueReading(RecvByteBufAllocator.Handle allocHandle) start to invoke," +
+                "this : {}" , this);
+        logger.debug("AbstractNioMessageChannel : continueReading(...) : allocHandle.continueReading() , allocHandle : {}" , this);
         return allocHandle.continueReading();
     }
 
@@ -70,7 +73,8 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
         @Override
         public void read() {
-            logger.debug("NioMessageUnsafe read() start to invoke : {}" , this);
+            logger.debug("");
+            logger.debug("NioMessageUnsafe read() start to invoke : this : {}" , this);
             assert eventLoop().inEventLoop();
             final ChannelConfig config = config();
             final ChannelPipeline pipeline = pipeline();
@@ -133,6 +137,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                     removeReadOp();
                 }
             }
+            logger.debug("NioMessageUnsafe read() : end invoke");
         }
     }
 

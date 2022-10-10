@@ -491,8 +491,10 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             // cancelled
             return promise;
         }
-
+        logger.debug("AbstractChannelHandlerContext : bind(final SocketAddress localAddress, final ChannelPromise promise) ,this : {}" ,this);
+        logger.debug("AbstractChannelHandlerContext : this : {}",this);
         final AbstractChannelHandlerContext next = findContextOutbound(MASK_BIND);
+        logger.debug("AbstractChannelHandlerContext : AbstractChannelHandlerContext next = findContextOutbound(MASK_BIND) , next : {}" , next);
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
             next.invokeBind(localAddress, promise);

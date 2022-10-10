@@ -25,7 +25,7 @@ public class SchSimpleServer {
      */
     public static void main(String[] args) throws InterruptedException {
 
-        System.setProperty("io.netty.allocator.type","unpooled");
+        //System.setProperty("io.netty.allocator.type","unpooled");
 
         EventLoopGroup parentGroup = new NioEventLoopGroup(1,new DefaultThreadFactory("schParentGroup"));
         EventLoopGroup childGroup = new NioEventLoopGroup(1,new DefaultThreadFactory("schChildGroup"));
