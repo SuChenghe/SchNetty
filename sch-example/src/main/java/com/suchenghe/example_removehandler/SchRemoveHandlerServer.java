@@ -1,4 +1,4 @@
-package com.suchenghe.example_simple;
+package com.suchenghe.example_removehandler;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * @author SuChenghe
  * @date 2018/7/27 15:57
  */
-public class SchSimpleServer {
+public class SchRemoveHandlerServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchSimpleServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchRemoveHandlerServer.class);
 
     /**
      * 启动服务
@@ -38,10 +38,10 @@ public class SchSimpleServer {
             serverBootstrap.group(parentGroup,childGroup).channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG,1024)
                 .handler(new LoggingHandler(LogLevel.DEBUG))
-                .childHandler(new SchSimpleInitializer());
+                .childHandler(new SchRemoveHandlerInitializer());
 
             ChannelFuture channelFuture = serverBootstrap.bind(61005).sync();
-            LOGGER.info("SchSimpleServer服务端启动成功,port:{}",61005);
+            LOGGER.info("SchRemoveHandlerServer服务端启动成功,port:{}",61005);
             channelFuture.channel().closeFuture().sync();
         } finally {
             parentGroup.shutdownGracefully();

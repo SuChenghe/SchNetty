@@ -17,7 +17,7 @@ public class SchInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline channelPipeline = ch.pipeline();
         channelPipeline.addLast(new SchIdleStateHandler());
-        IdleStateHandler newConnectionIdleHandler = new IdleStateHandler(3000L, 0L, 0L, TimeUnit.MILLISECONDS);
+        IdleStateHandler newConnectionIdleHandler = new IdleStateHandler(10000L, 0L, 0L, TimeUnit.MILLISECONDS);
         channelPipeline.addLast("SchIdleStateHandler", newConnectionIdleHandler);
         channelPipeline.addLast("SchNoConnectIdleEventHandler", new SchNoConnectIdleEventHandler());
     }
