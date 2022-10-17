@@ -140,7 +140,10 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     @Override
     public ByteBuf ioBuffer(int initialCapacity) {
+        logger.debug("AbstractByteBufAllocator : public ByteBuf ioBuffer(int initialCapacity) start to invoke ,this : {}" , this);
         if (PlatformDependent.hasUnsafe() || isDirectBufferPooled()) {
+            logger.debug("AbstractByteBufAllocator : public ByteBuf ioBuffer(int initialCapacity) : " +
+                    "ByteBuf byteBuf = directBuffer(initialCapacity); initialCapacity : {}" , initialCapacity);
             return directBuffer(initialCapacity);
         }
         return heapBuffer(initialCapacity);

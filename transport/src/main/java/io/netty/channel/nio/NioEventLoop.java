@@ -138,20 +138,16 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         super(parent, executor, false, newTaskQueue(queueFactory), newTaskQueue(queueFactory),
                 rejectedExecutionHandler);
         this.provider = ObjectUtil.checkNotNull(selectorProvider, "selectorProvider");
-        logger.debug("NioEventLoop : SelectorProvider provider : {} " , this.provider);
+        logger.debug("NioEventLoop(...) : private final SelectorProvider provider : {} " , this.provider);
         this.selectStrategy = ObjectUtil.checkNotNull(strategy, "selectStrategy");
-        logger.debug("NioEventLoop : SelectStrategy selectStrategy : {} " , this.selectStrategy);
+        logger.debug("NioEventLoop(...) : private final SelectStrategy selectStrategy : {} " , this.selectStrategy);
+        logger.debug("NioEventLoop(...) : final SelectorTuple selectorTuple = openSelector() 开始执行");
         final SelectorTuple selectorTuple = openSelector();
-        logger.debug("NioEventLoop : SelectStrategy selectorTuple 方法 : {} " , "openSelector()");
-        logger.debug("NioEventLoop : SelectorTuple selectorTuple 值 : {} " , selectorTuple);
+        logger.debug("NioEventLoop(...) : final SelectorTuple selectorTuple = openSelector() 执行完成: , selectorTuple : {} " , selectorTuple);
         this.selector = selectorTuple.selector;
-        logger.debug("NioEventLoop : Selector selector : {} " , this.selector);
-        logger.debug("NioEventLoop : Selector selector : 主要是将SelectorImpl中的" +
-                "\n private Set<SelectionKey> publicSelectedKeys;" +
-                "\n private Set<SelectionKey> selectedKeys; " +
-                "\n 替换成功数组形式的SelectionKey[] keys" );
+        logger.debug("NioEventLoop(...) : private Selector selector = selectorTuple.selector; selector : {}" , this.selector);
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
-        logger.debug("NioEventLoop : Selector unwrappedSelector : {} " , this.unwrappedSelector);
+        logger.debug("NioEventLoop(...) : private Selector unwrappedSelector = selectorTuple.unwrappedSelector; unwrappedSelector : {} " , this.unwrappedSelector);
     }
 
     private static Queue<Runnable> newTaskQueue(
@@ -178,12 +174,18 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     private SelectorTuple openSelector() {
+
+        logger.debug("private SelectorTuple openSelector() start to invoke");
+
         final Selector unwrappedSelector;
         try {
             unwrappedSelector = provider.openSelector();
         } catch (IOException e) {
             throw new ChannelException("failed to open a new selector", e);
         }
+
+        logger.debug("openSelector() : final Selector unwrappedSelector = provider.openSelector();" +
+                " unwrappedSelector : {}" , unwrappedSelector);
 
         if (DISABLE_KEY_SET_OPTIMIZATION) {
             return new SelectorTuple(unwrappedSelector);
@@ -266,6 +268,23 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             logger.trace("failed to instrument a special java.util.Set into: {}", unwrappedSelector, e);
             return new SelectorTuple(unwrappedSelector);
         }
+
+        logger.debug("openSelector() : final Selector unwrappedSelector 实现为 sun.nio.ch.SelectorImpl");
+        logger.debug("openSelector() : 将 sun.nio.ch.SelectorImpl中的\n" +
+                "    SelectorImpl类:\n" +
+                "       private Set<SelectionKey> publicKeys;\n" +
+                "       private Set<SelectionKey> publicSelectedKeys;\n" +
+                "       替换为 final SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();\n" +
+                "       替换方式：\n" +
+                "       如果 PlatformDependent.javaVersion() >= 9 && PlatformDependent.hasUnsafe() 则使用 use sun.misc.Unsafe 去替换 the SelectionKeySet \n" +
+                "       否则 使用反射机制替换\n"         +
+                "    SelectedSelectionKeySet类:\n" +
+                "       SelectionKey[] keys;\n" +
+                "       int size;\n" +
+                "       SelectedSelectionKeySet() {\n" +
+                "           keys = new SelectionKey[1024];\n" +
+                "       }");
+
         selectedKeys = selectedKeySet;
         logger.trace("instrumented a special java.util.Set into: {}", unwrappedSelector);
         return new SelectorTuple(unwrappedSelector,

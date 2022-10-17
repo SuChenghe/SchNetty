@@ -104,6 +104,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        logger.debug("ChannelInitializer : public void handlerAdded(ChannelHandlerContext ctx) start to invoke");
         if (ctx.channel().isRegistered()) {
             // This should always be true with our current DefaultChannelPipeline implementation.
             // The good thing about calling initChannel(...) in handlerAdded(...) is that there will be no ordering
@@ -124,8 +125,10 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
+        logger.debug("ChannelInitializer : private boolean initChannel(ChannelHandlerContext ctx) start to invoke");
         if (initMap.add(ctx)) { // Guard against re-entrance.
             try {
+                logger.debug("ChannelInitializer : initChannel(...) : initChannel((C) ctx.channel()) , ctx : {}" , ctx);
                 initChannel((C) ctx.channel());
             } catch (Throwable cause) {
                 // Explicitly call exceptionCaught(...) as we removed the handler before calling initChannel(...).
@@ -134,6 +137,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
             } finally {
                 ChannelPipeline pipeline = ctx.pipeline();
                 if (pipeline.context(this) != null) {
+                    logger.debug("ChannelInitializer : initChannel(...) : pipeline.remove(this); this : {}" , this);
                     pipeline.remove(this);
                 }
             }

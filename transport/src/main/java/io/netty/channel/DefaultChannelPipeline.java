@@ -209,12 +209,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
+        logger.debug("DefaultChannelPipeline : public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) start to invoke");
         final AbstractChannelHandlerContext newCtx;
         synchronized (this) {
+            logger.debug("DefaultChannelPipeline : addLast(...) : checkMultiplicity(handler); handler : {}" , handler);
             checkMultiplicity(handler);
 
             newCtx = newContext(group, filterName(name, handler), handler);
-            logger.debug("将ChannelHandler : {} 作为参数,创建一个AbstractChannelHandlerContext : {}",handler,newCtx);
+            logger.debug("DefaultChannelPipeline : addLast(...) : AbstractChannelHandlerContext newCtx = newContext(group, filterName(name, handler), handler);") ;
+            logger.debug("DefaultChannelPipeline : addLast(...) : AbstractChannelHandlerContext newCtx : {} ,handler : {}" , newCtx ,handler);
 
             addLast0(newCtx);
 
@@ -222,30 +225,37 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // In this case we add the context to the pipeline and add a task that will call
             // ChannelHandler.handlerAdded(...) once the channel is registered.
             if (!registered) {
-                logger.debug("AbstractChannelHandlerContext set to AddPending : {}" ,newCtx);
+                logger.debug("DefaultChannelPipeline : addLast(...) : the channel was not registered on an eventLoop yet , registered : {}" ,registered);
+                logger.debug("DefaultChannelPipeline : addLast(...) : AbstractChannelHandlerContext newCtx.setAddPending();" ,newCtx);
                 newCtx.setAddPending();
+                logger.debug("DefaultChannelPipeline : addLast(...) : callHandlerCallbackLater(newCtx, true); ");
                 callHandlerCallbackLater(newCtx, true);
                 return this;
             }
 
             EventExecutor executor = newCtx.executor();
             if (!executor.inEventLoop()) {
+                logger.debug("DefaultChannelPipeline : addLast(...) : callHandlerAddedInEventLoop(newCtx, executor); newCtx : {}" , newCtx);
                 callHandlerAddedInEventLoop(newCtx, executor);
                 return this;
             }
         }
+        logger.debug("DefaultChannelPipeline : addLast(...) : callHandlerAdded0(newCtx); newCtx : {}" , newCtx);
         callHandlerAdded0(newCtx);
         return this;
     }
 
     private void addLast0(AbstractChannelHandlerContext newCtx) {
-        logger.debug("addLast0 before, tail : {} ,tail.prev",tail,tail.prev);
+        logger.debug("DefaultChannelPipeline : addLast0(AbstractChannelHandlerContext newCtx) start to invoke");
+        logger.debug("DefaultChannelPipeline : addLast0(...) : add newCtx to tail.prev");
+        logger.debug("DefaultChannelPipeline : addLast0(...) : newCtx : {} , tail.prev : {}, tail.prev.prev : {}",
+                newCtx , tail.prev ,tail.prev.prev);
         AbstractChannelHandlerContext prev = tail.prev;
         newCtx.prev = prev;
         newCtx.next = tail;
         prev.next = newCtx;
         tail.prev = newCtx;
-        logger.debug("addLast0 after, tail : {} ,tail.prev",tail,tail.prev);
+        logger.debug("DefaultChannelPipeline : addLast0(AbstractChannelHandlerContext newCtx) end invoke");
     }
 
     @Override
@@ -466,9 +476,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     private AbstractChannelHandlerContext remove(final AbstractChannelHandlerContext ctx) {
+        logger.debug("DefaultChannelPipeline :  private AbstractChannelHandlerContext remove(final AbstractChannelHandlerContext ctx) start to invoke");
+
         assert ctx != head && ctx != tail;
 
         synchronized (this) {
+            logger.debug("DefaultChannelPipeline : AbstractChannelHandlerContext remove(...) : atomicRemoveFromHandlerList(ctx) ");
             atomicRemoveFromHandlerList(ctx);
 
             // If the registered is false it means that the channel was not registered on an eventloop yet.
@@ -484,12 +497,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
+                        logger.debug("DefaultChannelPipeline : AbstractChannelHandlerContext remove(...) : callHandlerRemoved0(ctx);" +
+                                " ctx : {}" , ctx );
                         callHandlerRemoved0(ctx);
                     }
                 });
                 return ctx;
             }
         }
+        logger.debug("DefaultChannelPipeline : AbstractChannelHandlerContext remove(...) : callHandlerRemoved0(ctx);" +
+                " ctx : {}" , ctx );
         callHandlerRemoved0(ctx);
         return ctx;
     }
@@ -658,6 +675,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     final void invokeHandlerAddedIfNeeded() {
+        logger.debug("invokeHandlerAddedIfNeeded() : start to invoke : this : {}" , this);
         assert channel.eventLoop().inEventLoop();
         if (firstRegistration) {
             firstRegistration = false;
@@ -829,6 +847,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRegistered() {
+        logger.debug("public final ChannelPipeline fireChannelRegistered() start to invoke , this : {}" ,this);
+        logger.debug("fireChannelRegistered() : AbstractChannelHandlerContext.invokeChannelRegistered(head); head : {}" ,head);
         AbstractChannelHandlerContext.invokeChannelRegistered(head);
         return this;
     }
@@ -1138,23 +1158,24 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
+        logger.debug("DefaultChannelPipeline : private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) start to invoke");
         assert !registered;
 
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
-        logger.debug("PendingHandlerCallback Task create : {}",task);
+        logger.debug("DefaultChannelPipeline : callHandlerCallbackLater(...) : PendingHandlerCallback create : {}",task);
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
+            logger.debug("DefaultChannelPipeline : callHandlerCallbackLater(...) : pendingHandlerCallbackHead is null");
             pendingHandlerCallbackHead = task;
-            logger.debug("private PendingHandlerCallback pendingHandlerCallbackHead is null");
-            logger.debug("Set the PendingHandlerCallback : {} to PendingHandlerCallbackHead" , task);
+            logger.debug("DefaultChannelPipeline : callHandlerCallbackLater(...) : pendingHandlerCallbackHead = task , pendingHandlerCallbackHead : {}" , pendingHandlerCallbackHead);
         } else {
-            logger.debug("private PendingHandlerCallback pendingHandlerCallbackHead is not null : {}" , pending);
+            logger.debug("DefaultChannelPipeline : callHandlerCallbackLater(...) : pendingHandlerCallbackHead is null , pending : {}" ,pending);
             // Find the tail of the linked-list.
             while (pending.next != null) {
                 pending = pending.next;
             }
             pending.next = task;
-            logger.debug("Set the PendingHandlerCallback : {} to the tail of the linked-list" , task);
+            logger.debug("DefaultChannelPipeline : callHandlerCallbackLater(...) : Set the PendingHandlerCallback : {} to the tail of the linked-list" , task);
         }
     }
 
@@ -1163,6 +1184,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                logger.debug("DefaultChannelPipeline : callHandlerAdded0(newCtx); newCtx : {}" , newCtx);
                 callHandlerAdded0(newCtx);
             }
         });
@@ -1410,7 +1432,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) {
+            logger.debug("HeadContext : public void channelRegistered(ChannelHandlerContext ctx) start to invoke");
+            logger.debug("HeadContext : public void channelRegistered(...) : invokeHandlerAddedIfNeeded();");
             invokeHandlerAddedIfNeeded();
+            logger.debug("HeadContext : public void channelRegistered(...) : ctx.fireChannelRegistered();");
             ctx.fireChannelRegistered();
         }
 
@@ -1492,9 +1517,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         void execute() {
             EventExecutor executor = ctx.executor();
-            logger.debug("PendingHandlerAddedTask execute() start to invoke : executor : {} ,thread : {}"
+            logger.debug("DefaultChannelPipeline : PendingHandlerAddedTask execute() start to invoke : executor : {} ,thread : {}"
                     , executor ,Thread.currentThread().getName());
             if (executor.inEventLoop()) {
+                logger.debug("DefaultChannelPipeline : PendingHandlerAddedTask execute() : allHandlerAdded0(ctx); ctx : {}", ctx);
                 callHandlerAdded0(ctx);
             } else {
                 try {

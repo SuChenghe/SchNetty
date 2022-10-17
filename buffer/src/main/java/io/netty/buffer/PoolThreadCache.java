@@ -66,6 +66,7 @@ final class PoolThreadCache {
     PoolThreadCache(PoolArena<byte[]> heapArena, PoolArena<ByteBuffer> directArena,
                     int smallCacheSize, int normalCacheSize, int maxCachedBufferCapacity,
                     int freeSweepAllocationThreshold) {
+        logger.debug("");
         logger.info("PoolThreadCache(...) start to invoke");
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
         this.freeSweepAllocationThreshold = freeSweepAllocationThreshold;
@@ -73,16 +74,18 @@ final class PoolThreadCache {
         this.directArena = directArena;
         if (directArena != null) {
 
-            logger.info("PoolThreadCache(...) : MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches 赋值 , \n" +
-                    " 方法为createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools) : \n" +
-                    "smallCacheSize : {} , directArena.numSmallSubpagePools : {}",smallCacheSize,directArena.numSmallSubpagePools);
+            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches " +
+                    " = createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools");
+            logger.info("PoolThreadCache(...) : createSubPageCaches(...)," +
+                    " smallCacheSize : {} , directArena.numSmallSubpagePools : {}",smallCacheSize,directArena.numSmallSubpagePools);
 
             smallSubPageDirectCaches = createSubPageCaches(
                     smallCacheSize, directArena.numSmallSubpagePools);
 
-            logger.info("PoolThreadCache(...) : MemoryRegionCache<ByteBuffer>[] normalDirectCaches 赋值 , \n" +
-                    " 方法为createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena) : \n" +
-                    "normalCacheSize : {} , maxCachedBufferCapacity : {} " , normalCacheSize , maxCachedBufferCapacity);
+            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] normalDirectCaches " +
+                    " = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena)");
+            logger.info("PoolThreadCache(...) : createNormalCaches(...), " +
+                    " normalCacheSize : {} , maxCachedBufferCapacity : {} , directArena : {}" , normalCacheSize , maxCachedBufferCapacity , directArena);
 
             normalDirectCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, directArena);
@@ -96,16 +99,18 @@ final class PoolThreadCache {
         if (heapArena != null) {
             // Create the caches for the heap allocations
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches 赋值 , \n" +
-                    " 方法为createSubPageCaches(smallCacheSize, heapArena.numSmallSubpagePools) \n" +
+            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches " +
+                    " = createSubPageCaches(mallCacheSize, heapArena.numSmallSubpagePools)");
+            logger.info("PoolThreadCache(...) : createSubPageCaches(...), " +
                     "smallCacheSize : {} , heapArena.numSmallSubpagePools : {}",smallCacheSize,heapArena.numSmallSubpagePools);
 
             smallSubPageHeapCaches = createSubPageCaches(
                     smallCacheSize, heapArena.numSmallSubpagePools);
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] normalHeapCaches 赋值 ,\n" +
-                    " 方法为createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena) \n" +
-                    "normalCacheSize : {} , maxCachedBufferCapacity : {} " , normalCacheSize , maxCachedBufferCapacity);
+            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] normalHeapCaches " +
+                    " = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena)");
+            logger.info("PoolThreadCache(...) : createNormalCaches(...), " +
+                    " normalCacheSize : {} , maxCachedBufferCapacity : {} " , normalCacheSize , maxCachedBufferCapacity);
 
             normalHeapCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, heapArena);
@@ -124,22 +129,24 @@ final class PoolThreadCache {
             throw new IllegalArgumentException("freeSweepAllocationThreshold: "
                     + freeSweepAllocationThreshold + " (expected: > 0)");
         }
-        logger.info("PoolThreadCache 构造函数结束执行");
+        logger.debug("PoolThreadCache(...) end invoke");
+        logger.debug("");
     }
 
     private static <T> MemoryRegionCache<T>[] createSubPageCaches(
             int cacheSize, int numCaches) {
         if (cacheSize > 0 && numCaches > 0) {
-            logger.debug("private static <T> MemoryRegionCache<T>[] createSubPageCaches(int cacheSize, int numCaches)方法执行 , cacheSize : {} , numCaches : {}"
+            logger.debug("PoolThreadCache : private static <T> MemoryRegionCache<T>[] createSubPageCaches(int cacheSize, int numCaches)方法执行 ," +
+                            " cacheSize : {} , numCaches : {}"
             ,cacheSize,numCaches);
-            logger.debug("... createSubPageCaches(...)方法执行 : MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];");
-            logger.debug("... createSubPageCaches(...)方法执行 : cache循环 : cache[i] = new SubPageMemoryRegionCache<T>(cacheSize);");
+            logger.debug("PoolThreadCache : createSubPageCaches(...) : MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];");
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];
             for (int i = 0; i < cache.length; i++) {
                 // TODO: maybe use cacheSize / cache.length
                 cache[i] = new SubPageMemoryRegionCache<T>(cacheSize);
             }
+            logger.debug("PoolThreadCache : createSubPageCaches(...) : cache循环 : cache[i] = new SubPageMemoryRegionCache<T>(cacheSize); cache.length : {}" ,cache.length);
             return cache;
         } else {
             return null;
@@ -149,23 +156,23 @@ final class PoolThreadCache {
     @SuppressWarnings("unchecked")
     private static <T> MemoryRegionCache<T>[] createNormalCaches(
             int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
-        logger.debug("private static <T> MemoryRegionCache<T>[] createNormalCaches(int cacheSize, " +
+        logger.debug("PoolThreadCache : private static <T> MemoryRegionCache<T>[] createNormalCaches(int cacheSize, " +
                 "int maxCachedBufferCapacity, PoolArena<T> area) start to invoke");
         if (cacheSize > 0 && maxCachedBufferCapacity > 0) {
             int max = Math.min(area.chunkSize, maxCachedBufferCapacity);
             // Create as many normal caches as we support based on how many sizeIdx we have and what the upper
             // bound is that we want to cache in general.
-            logger.debug("...createNormalCaches(...) : List<MemoryRegionCache<T>> cache = new ArrayList<MemoryRegionCache<T>>()");
+            logger.debug("PoolThreadCache : createNormalCaches(...) : List<MemoryRegionCache<T>> cache = new ArrayList<MemoryRegionCache<T>>()");
             List<MemoryRegionCache<T>> cache = new ArrayList<MemoryRegionCache<T>>() ;
-            logger.debug("...createNormalCaches(...) : idx-value : {}" , area.numSmallSubpagePools);
-            logger.debug("...createNormalCaches(...) : area.nSizes-value : {}" , area.nSizes);
-            logger.debug("...createNormalCaches(...) : area.sizeIdx2size(\"{}\") : {}"
-                    , area.numSmallSubpagePools , area.sizeIdx2size(area.numSmallSubpagePools));
-            logger.debug("...createNormalCaches(...) : max : {}" , max);
+//            logger.debug("PoolThreadCache : createNormalCaches(...) : idx-value : {}" , area.numSmallSubpagePools);
+//            logger.debug("PoolThreadCache : createNormalCaches(...) : area.nSizes-value : {}" , area.nSizes);
+//            logger.debug("PoolThreadCache : createNormalCaches(...) : area.sizeIdx2size(\"{}\") : {}"
+//                    , area.numSmallSubpagePools , area.sizeIdx2size(area.numSmallSubpagePools));
+//            logger.debug("PoolThreadCache : createNormalCaches(...) : max : {}" , max);
             for (int idx = area.numSmallSubpagePools; idx < area.nSizes && area.sizeIdx2size(idx) <= max ; idx++) {
                 cache.add(new NormalMemoryRegionCache<T>(cacheSize));
             }
-            logger.debug("...createNormalCaches(...) : List<MemoryRegionCache<T>> cache : size : {}" , cache.size());
+            logger.debug("PoolThreadCache : createNormalCaches(...) : List<MemoryRegionCache<T>> cache : size : {}" , cache.size());
             return cache.toArray(new MemoryRegionCache[0]);
         } else {
             return null;

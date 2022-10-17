@@ -409,6 +409,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     @Override
     protected void doBeginRead() throws Exception {
+        logger.debug("AbstractNioChannel : doBeginRead() start to invoke , this : {} ", this);
         // Channel.read() or ChannelHandlerContext.read() was called
         final SelectionKey selectionKey = this.selectionKey;
         if (!selectionKey.isValid()) {
@@ -418,16 +419,18 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         readPending = true;
 
         String readInterestOpValue = null;
-        if(readInterestOp == SelectionKey.OP_ACCEPT){
+        if (readInterestOp == SelectionKey.OP_ACCEPT) {
             readInterestOpValue = readInterestOp + ":SelectionKey.OP_ACCEPT";
+        }else if(readInterestOp == SelectionKey.OP_READ){
+            readInterestOpValue = readInterestOp + ":SelectionKey.OP_READ";
         }else{
             readInterestOpValue = String.valueOf(readInterestOp);
         }
-        logger.debug("AbstractNioChannel : 设置监听事件\n" +
+        logger.debug("AbstractNioChannel : doBeginRead() : 设置监听事件\n" +
                 "   final int interestOps = selectionKey.interestOps();\n" +
                 "   if ((interestOps & readInterestOp) == 0) {\n" +
                 "      selectionKey.interestOps(interestOps | readInterestOp);\n" +
-                "   }" +
+                "   }\n" +
                 "   readInterestOp : {}",readInterestOpValue);
 
         final int interestOps = selectionKey.interestOps();

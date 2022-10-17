@@ -508,7 +508,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
-            logger.debug("AbstractUnsafe register(EventLoop eventLoop, final ChannelPromise promise) start to invoke");
+            logger.debug("AbstractUnsafe register(EventLoop eventLoop, final ChannelPromise promise) start to invoke : this : {}",this);
             ObjectUtil.checkNotNull(eventLoop, "eventLoop");
             if (isRegistered()) {
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
@@ -527,7 +527,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 register0(promise);
             } else {
                 try {
-                    logger.debug("eventLoop.execute(new Runnable(register0(promise))");
+                    logger.debug("eventLoop.execute(new Runnable(register0(promise)) : eventLoop : {} " , eventLoop);
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -569,7 +569,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);
-                logger.debug("register0(ChannelPromise promise) : pipeline.fireChannelRegistered()");
+                logger.debug("register0(ChannelPromise promise) : pipeline.fireChannelRegistered() : pipeline : {}" , pipeline);
                 pipeline.fireChannelRegistered();
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.

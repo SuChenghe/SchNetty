@@ -153,8 +153,10 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
+        logger.debug("static void invokeChannelRegistered(final AbstractChannelHandlerContext next) start to invoke");
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
+            logger.debug("static void invokeChannelRegistered(...) :  next.invokeChannelRegistered() ,next : {}",next);
             next.invokeChannelRegistered();
         } else {
             executor.execute(new Runnable() {
@@ -169,6 +171,8 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     private void invokeChannelRegistered() {
         if (invokeHandler()) {
             try {
+                logger.debug("private void invokeChannelRegistered() start to invoke : this : {}" ,this);
+                logger.debug("private void invokeChannelRegistered() : ((ChannelInboundHandler) handler()).channelRegistered(this); this : {}" ,this);
                 ((ChannelInboundHandler) handler()).channelRegistered(this);
             } catch (Throwable t) {
                 invokeExceptionCaught(t);
@@ -675,6 +679,10 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     @Override
     public ChannelHandlerContext read() {
         final AbstractChannelHandlerContext next = findContextOutbound(MASK_READ);
+        logger.debug("AbstractChannelHandlerContext : public ChannelHandlerContext read() :" +
+                " final AbstractChannelHandlerContext next = findContextOutbound(MASK_READ);");
+        logger.debug("AbstractChannelHandlerContext : public ChannelHandlerContext read() :" +
+                " final AbstractChannelHandlerContext next : {}" ,next);
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
             next.invokeRead();

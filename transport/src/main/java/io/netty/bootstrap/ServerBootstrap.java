@@ -219,17 +219,19 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            logger.debug("ServerBootstrapAcceptor start to invoke channelRead(ChannelHandlerContext ctx, Object msg)");
+            logger.debug("ServerBootstrapAcceptor : channelRead(ChannelHandlerContext ctx, Object msg) start to invoke ");
             logger.debug("ServerBootstrapAcceptor : ctx : {}, msg : {}",ctx,msg);
             final Channel child = (Channel) msg;
 
             logger.debug("");
-            logger.debug("ServerBootstrapAcceptor : child.pipeline().addLast(childHandler) start to invoke");
+            logger.debug("ServerBootstrapAcceptor : child.pipeline().addLast(childHandler) start to invoke, childHandler : {}" ,childHandler);
             child.pipeline().addLast(childHandler);
             logger.debug("ServerBootstrapAcceptor : child.pipeline().addLast(childHandler) complete");
             logger.debug("");
 
+            logger.debug("ServerBootstrapAcceptor : setChannelOptions(child, childOptions, logger) : childOptions : {}",childOptions);
             setChannelOptions(child, childOptions, logger);
+            logger.debug("ServerBootstrapAcceptor : setChannelOptions(child, childOptions, logger) : childAttrs : {}",childAttrs);
             setAttributes(child, childAttrs);
 
             try {

@@ -18,6 +18,8 @@ package io.netty.channel;
 
 import io.netty.channel.ChannelHandlerMask.Skip;
 import io.netty.util.internal.InternalThreadLocalMap;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.Map;
 
@@ -25,6 +27,8 @@ import java.util.Map;
  * Skeleton implementation of a {@link ChannelHandler}.
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
+
+    static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelHandlerAdapter.class);
 
     // Not using volatile because it's used only for a sanity check.
     boolean added;
@@ -58,6 +62,7 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
             sharable = clazz.isAnnotationPresent(Sharable.class);
             cache.put(clazz, sharable);
         }
+        logger.debug("ChannelHandlerAdapter : public boolean isSharable() 判定 : this : {} , sharable : {}" , this ,sharable);
         return sharable;
     }
 

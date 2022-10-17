@@ -165,15 +165,16 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                                         boolean addTaskWakesUp, Queue<Runnable> taskQueue,
                                         RejectedExecutionHandler rejectedHandler) {
         super(parent);
-        logger.debug("NioEventLoop 继承关系 : NioEventLoop extends SingleThreadEventLoop extends SingleThreadEventExecutor ");
+        logger.debug("SingleThreadEventExecutor(EventExecutorGroup parent, Executor executor,boolean addTaskWakesUp, Queue<Runnable> taskQueue,RejectedExecutionHandler rejectedHandler) start to invoke");
         this.addTaskWakesUp = addTaskWakesUp;
         this.maxPendingTasks = DEFAULT_MAX_PENDING_EXECUTOR_TASKS;
         this.executor = ThreadExecutorMap.apply(executor, this);
-        logger.debug("SingleThreadEventExecutor : Executor executor : {}" , this.executor);
+        logger.debug("SingleThreadEventExecutor(...) : private final Executor executor = ThreadExecutorMap.apply(executor, this); " , this.executor);
+        logger.debug("SingleThreadEventExecutor(...) : Executor executor : {} ,executor : {} " , this.executor , executor);
         this.taskQueue = ObjectUtil.checkNotNull(taskQueue, "taskQueue");
-        logger.debug("SingleThreadEventExecutor : Queue<Runnable> taskQueue : {}" , this.taskQueue);
+        logger.debug("SingleThreadEventExecutor(...) : Queue<Runnable> taskQueue : {}" , this.taskQueue);
         this.rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
-        logger.debug("SingleThreadEventExecutor : RejectedExecutionHandler rejectedExecutionHandler : {}" , this.rejectedExecutionHandler);
+        logger.debug("SingleThreadEventExecutor(...) : RejectedExecutionHandler rejectedExecutionHandler : {}" , this.rejectedExecutionHandler);
     }
 
     /**

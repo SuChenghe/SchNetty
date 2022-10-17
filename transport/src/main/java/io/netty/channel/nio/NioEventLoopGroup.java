@@ -141,6 +141,8 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
 
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
+        logger.debug("");
+        logger.debug("NioEventLoopGroup : protected EventLoop newChild(Executor executor, Object... args) start to invoke");
         EventLoopTaskQueueFactory queueFactory = args.length == 4 ? (EventLoopTaskQueueFactory) args[3] : null;
         logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : NioEventLoopGroup parent : {} " , this);
         logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : Executor executor : {} " , executor);
@@ -148,9 +150,13 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
         logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : SelectStrategyFactory strategyFactory : {} " , args[1]);
         logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : RejectedExecutionHandler rejectedExecutionHandler : {} " , args[2]);
         logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : 参数 : EventLoopTaskQueueFactory queueFactory : {} " , queueFactory);
+
+        logger.debug("NioEventLoopGroup newChild (...) : new NioEventLoop(...) start to invoke");
+        logger.debug("NioEventLoop 继承关系 : NioEventLoop extends SingleThreadEventLoop extends SingleThreadEventExecutor");
         NioEventLoop nioEventLoop = new NioEventLoop(this, executor, (SelectorProvider) args[0],
             ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2], queueFactory);
-        logger.debug("NioEventLoopGroup newChild (...) : new a NioEventLoop : result : {}", nioEventLoop);
+        logger.debug("NioEventLoopGroup : protected EventLoop newChild(Executor executor, Object... args) end invoke: result : {}", nioEventLoop);
+        logger.debug("");
         return nioEventLoop;
     }
 }

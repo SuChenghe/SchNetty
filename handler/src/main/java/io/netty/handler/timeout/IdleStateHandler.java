@@ -26,6 +26,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundBuffer;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.internal.ObjectUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -97,6 +99,8 @@ import java.util.concurrent.TimeUnit;
  * @see WriteTimeoutHandler
  */
 public class IdleStateHandler extends ChannelDuplexHandler {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(IdleStateHandler.class);
     private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
     // Not create a new ChannelFutureListener per write operation to reduce GC pressure.
@@ -492,7 +496,10 @@ public class IdleStateHandler extends ChannelDuplexHandler {
                 nextDelay -= ticksInNanos() - lastReadTime;
             }
 
+            logger.debug("IdleStateHandler : ReaderIdleTimeoutTask : protected void run(ChannelHandlerContext ctx) start to run");
+
             if (nextDelay <= 0) {
+                logger.debug("protected void run(...) : ");
                 // Reader is idle - set a new timeout and notify the callback.
                 readerIdleTimeout = schedule(ctx, this, readerIdleTimeNanos, TimeUnit.NANOSECONDS);
 

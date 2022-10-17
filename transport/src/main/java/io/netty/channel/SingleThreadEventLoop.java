@@ -68,7 +68,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
                                     RejectedExecutionHandler rejectedExecutionHandler) {
         super(parent, executor, addTaskWakesUp, taskQueue, rejectedExecutionHandler);
         tailTasks = ObjectUtil.checkNotNull(tailTaskQueue, "tailTaskQueue");
-        logger.debug("SingleThreadEventLoop : Queue<Runnable> tailTasks : {}" , this.tailTasks);
+        logger.debug("SingleThreadEventLoop(...) : private final Queue<Runnable> tailTasks; : {}" , this.tailTasks);
     }
 
     @Override

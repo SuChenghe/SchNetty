@@ -91,11 +91,14 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        logger.debug("SimpleChannelInboundHandler<I> : public void channelRead(ChannelHandlerContext ctx, Object msg) start to invoke");
         boolean release = true;
         try {
             if (acceptInboundMessage(msg)) {
+                logger.debug("SimpleChannelInboundHandler<I> : channelRead(...) : acceptInboundMessage(msg) is true");
                 @SuppressWarnings("unchecked")
                 I imsg = (I) msg;
+                logger.debug("SimpleChannelInboundHandler<I> : channelRead(...) : channelRead0(ctx, imsg); imsg : {}" , imsg);
                 channelRead0(ctx, imsg);
             } else {
                 release = false;
@@ -103,6 +106,7 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
             }
         } finally {
             if (autoRelease && release) {
+                logger.debug("SimpleChannelInboundHandler<I> : channelRead(...) : ReferenceCountUtil.release(msg); msg : {}" , msg);
                 ReferenceCountUtil.release(msg);
             }
         }
