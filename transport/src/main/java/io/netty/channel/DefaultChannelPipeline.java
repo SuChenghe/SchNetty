@@ -1417,12 +1417,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+            logger.debug("HeadContext : public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) : start to invoke");
+            logger.debug("HeadContext : write(...) : unsafe.write(msg, promise); unsafe : {}" , unsafe);
             unsafe.write(msg, promise);
+            logger.debug("HeadContext : public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) : end to invoke");
         }
 
         @Override
         public void flush(ChannelHandlerContext ctx) {
+            logger.debug("HeadContext : public void flush(ChannelHandlerContext ctx) : start to invoke");
+            logger.debug("HeadContext : flush(...) : unsafe.flush(); unsafe : {}" , unsafe);
             unsafe.flush();
+            logger.debug("HeadContext : public void flush(ChannelHandlerContext ctx) : end to invoke");
         }
 
         @Override

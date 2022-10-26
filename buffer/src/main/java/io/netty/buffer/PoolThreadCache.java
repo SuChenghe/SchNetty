@@ -67,24 +67,24 @@ final class PoolThreadCache {
                     int smallCacheSize, int normalCacheSize, int maxCachedBufferCapacity,
                     int freeSweepAllocationThreshold) {
         logger.debug("");
-        logger.info("PoolThreadCache(...) start to invoke");
+        logger.debug("PoolThreadCache(...) start to invoke");
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
         this.freeSweepAllocationThreshold = freeSweepAllocationThreshold;
         this.heapArena = heapArena;
         this.directArena = directArena;
         if (directArena != null) {
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches " +
+            logger.debug("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches " +
                     " = createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools");
-            logger.info("PoolThreadCache(...) : createSubPageCaches(...)," +
+            logger.debug("PoolThreadCache(...) : createSubPageCaches(...)," +
                     " smallCacheSize : {} , directArena.numSmallSubpagePools : {}",smallCacheSize,directArena.numSmallSubpagePools);
 
             smallSubPageDirectCaches = createSubPageCaches(
                     smallCacheSize, directArena.numSmallSubpagePools);
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] normalDirectCaches " +
+            logger.debug("PoolThreadCache(...) : private final MemoryRegionCache<ByteBuffer>[] normalDirectCaches " +
                     " = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena)");
-            logger.info("PoolThreadCache(...) : createNormalCaches(...), " +
+            logger.debug("PoolThreadCache(...) : createNormalCaches(...), " +
                     " normalCacheSize : {} , maxCachedBufferCapacity : {} , directArena : {}" , normalCacheSize , maxCachedBufferCapacity , directArena);
 
             normalDirectCaches = createNormalCaches(
@@ -99,17 +99,17 @@ final class PoolThreadCache {
         if (heapArena != null) {
             // Create the caches for the heap allocations
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches " +
+            logger.debug("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches " +
                     " = createSubPageCaches(mallCacheSize, heapArena.numSmallSubpagePools)");
-            logger.info("PoolThreadCache(...) : createSubPageCaches(...), " +
+            logger.debug("PoolThreadCache(...) : createSubPageCaches(...), " +
                     "smallCacheSize : {} , heapArena.numSmallSubpagePools : {}",smallCacheSize,heapArena.numSmallSubpagePools);
 
             smallSubPageHeapCaches = createSubPageCaches(
                     smallCacheSize, heapArena.numSmallSubpagePools);
 
-            logger.info("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] normalHeapCaches " +
+            logger.debug("PoolThreadCache(...) : private final MemoryRegionCache<byte[]>[] normalHeapCaches " +
                     " = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena)");
-            logger.info("PoolThreadCache(...) : createNormalCaches(...), " +
+            logger.debug("PoolThreadCache(...) : createNormalCaches(...), " +
                     " normalCacheSize : {} , maxCachedBufferCapacity : {} " , normalCacheSize , maxCachedBufferCapacity);
 
             normalHeapCaches = createNormalCaches(

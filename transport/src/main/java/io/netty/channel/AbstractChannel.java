@@ -929,6 +929,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void write(Object msg, ChannelPromise promise) {
+            logger.debug("AbstractUnsafe : public final void write(Object msg, ChannelPromise promise) start to invoke");
+            logger.debug("AbstractUnsafe : write(...) : this : {} " , this);
             assertEventLoop();
 
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
@@ -962,25 +964,31 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 }
                 return;
             }
-
+            logger.debug("AbstractUnsafe : private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this); outboundBuffer : {} " , outboundBuffer);
+            logger.debug("AbstractUnsafe : write(...) : outboundBuffer.addMessage(msg, size, promise); size : {}" , size);
             outboundBuffer.addMessage(msg, size, promise);
+            logger.debug("AbstractUnsafe : public final void write(Object msg, ChannelPromise promise) end to invoke");
         }
 
         @Override
         public final void flush() {
+            logger.debug("AbstractUnsafe : public final void flush() start to invoke ; this : {}" , this);
             assertEventLoop();
 
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
             if (outboundBuffer == null) {
                 return;
             }
-
+            logger.debug("AbstractUnsafe : flush() : outboundBuffer.addFlush()");
             outboundBuffer.addFlush();
+            logger.debug("AbstractUnsafe : flush() : flush0()");
             flush0();
+            logger.debug("AbstractUnsafe : public final void flush() end to invoke");
         }
 
         @SuppressWarnings("deprecation")
         protected void flush0() {
+            logger.debug("AbstractChannel : protected void flush0() start to invoke ,this : {} " ,this);
             if (inFlush0) {
                 // Avoid re-entrance
                 return;
@@ -1012,12 +1020,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
+                logger.debug("AbstractChannel : flush0() : doWrite(outboundBuffer);" );
                 doWrite(outboundBuffer);
             } catch (Throwable t) {
                 handleWriteError(t);
             } finally {
                 inFlush0 = false;
             }
+            logger.debug("AbstractChannel : protected void flush0() end invoke");
         }
 
         protected final void handleWriteError(Throwable t) {

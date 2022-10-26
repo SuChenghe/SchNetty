@@ -511,19 +511,19 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         @Override
         protected synchronized PoolThreadCache initialValue() {
             logger.debug("");
-            logger.info("PoolThreadLocalCache : protected synchronized PoolThreadCache initialValue() start to invoke");
-            logger.info("final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache>");
+            logger.debug("PoolThreadLocalCache : protected synchronized PoolThreadCache initialValue() start to invoke");
+            logger.debug("final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache>");
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
-            logger.info("PoolThreadLocalCache : initialValue() : PoolArena<byte[]> heapArena , heapArenas : {}",heapArena);
-            logger.info("PoolThreadLocalCache : initialValue() : PoolArena<ByteBuffer> directArena , directArenas : {}",directArenas);
+            logger.debug("PoolThreadLocalCache : initialValue() : PoolArena<byte[]> heapArena , heapArenas : {}",heapArena);
+            logger.debug("PoolThreadLocalCache : initialValue() : PoolArena<ByteBuffer> directArena , directArenas : {}",directArenas);
 
             final Thread current = Thread.currentThread();
             if (useCacheForAllThreads || current instanceof FastThreadLocalThread) {
-                logger.info("PoolThreadLocalCache : initialValue() : new PoolThreadCache(\n" +
+                logger.debug("PoolThreadLocalCache : initialValue() : new PoolThreadCache(\n" +
                         "                        heapArena, directArena, smallCacheSize, normalCacheSize,\n" +
                         "                        DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL)");
-                logger.info("PoolThreadLocalCache : initialValue() : smallCacheSize : {} , normalCacheSize : {} , " +
+                logger.debug("PoolThreadLocalCache : initialValue() : smallCacheSize : {} , normalCacheSize : {} , " +
                                 "DEFAULT_MAX_CACHED_BUFFER_CAPACITY : {} , DEFAULT_CACHE_TRIM_INTERVAL : {}",
                         smallCacheSize,normalCacheSize,DEFAULT_MAX_CACHED_BUFFER_CAPACITY,DEFAULT_CACHE_TRIM_INTERVAL);
                 final PoolThreadCache cache = new PoolThreadCache(
@@ -542,7 +542,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             // No caching so just use 0 as sizes.
             //return new PoolThreadCache(heapArena, directArena, 0, 0, 0, 0);
             PoolThreadCache poolThreadCache = new PoolThreadCache(heapArena, directArena, 0, 0, 0, 0);
-            logger.info("PoolThreadLocalCache : protected synchronized PoolThreadCache initialValue() end invoke , poolThreadCache : {}" , poolThreadCache);
+            logger.debug("PoolThreadLocalCache : protected synchronized PoolThreadCache initialValue() end invoke , poolThreadCache : {}" , poolThreadCache);
             return poolThreadCache;
         }
 

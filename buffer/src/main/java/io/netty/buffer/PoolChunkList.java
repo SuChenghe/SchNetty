@@ -101,12 +101,12 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     }
 
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int sizeIdx, PoolThreadCache threadCache) {
-        logger.info("PoolChunkList : allocate start to invoke , this : {}",this);
+        logger.debug("PoolChunkList : allocate start to invoke , this : {}",this);
         int normCapacity = arena.sizeIdx2size(sizeIdx);
         if (normCapacity > maxCapacity) {
             // Either this PoolChunkList is empty or the requested capacity is larger then the capacity which can
             // be handled by the PoolChunks that are contained in this PoolChunkList.
-            logger.info("PoolChunkList : allocate normCapacity > maxCapacity , return : {}",false);
+            logger.debug("PoolChunkList : allocate normCapacity > maxCapacity , return : {}",false);
             return false;
         }
 
@@ -116,11 +116,11 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
                     remove(cur);
                     nextList.add(cur);
                 }
-                logger.info("PoolChunkList : allocate return : {}",true);
+                logger.debug("PoolChunkList : allocate return : {}",true);
                 return true;
             }
         }
-        logger.info("PoolChunkList : allocate return : {}",false);
+        logger.debug("PoolChunkList : allocate return : {}",false);
         return false;
     }
 

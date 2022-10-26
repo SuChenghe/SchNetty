@@ -220,6 +220,8 @@ public class TrafficCounter {
      * @param newLastTime the milliseconds unix timestamp that we should be considered up-to-date for.
      */
     synchronized void resetAccounting(long newLastTime) {
+        logger.debug("TrafficCounter : synchronized void resetAccounting(long newLastTime) start to invoke");
+        logger.debug("TrafficCounter : resetAccounting(...) : TrafficCounter : {} , newLastTime : {}"  , this, newLastTime);
         long interval = newLastTime - lastTime.getAndSet(newLastTime);
         if (interval == 0) {
             // nothing to do
@@ -237,6 +239,11 @@ public class TrafficCounter {
         realWriteThroughput = realWrittenBytes.getAndSet(0) * 1000 / interval;
         lastWritingTime = Math.max(lastWritingTime, writingTime);
         lastReadingTime = Math.max(lastReadingTime, readingTime);
+        logger.debug("TrafficCounter : resetAccounting(...) : lastReadBytes : {} , lastWrittenBytes : {} ,lastReadThroughput : {}" +
+                ",lastWriteThroughput : {} ,realWriteThroughput : {} ,lastWritingTime : {} , lastReadingTime : {}"
+                , lastReadBytes , lastWrittenBytes ,lastReadThroughput ,lastWriteThroughput ,realWriteThroughput ,lastWritingTime,lastReadingTime);
+        logger.debug("TrafficCounter : resetAccounting(...) : currentReadBytes : {} , currentWrittenBytes : {}", currentReadBytes , currentWrittenBytes);
+        logger.debug("TrafficCounter : synchronized void resetAccounting(long newLastTime) end to invoke");
     }
 
     /**

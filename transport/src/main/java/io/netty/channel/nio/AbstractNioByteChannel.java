@@ -276,13 +276,19 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     @Override
     protected final Object filterOutboundMessage(Object msg) {
+        logger.debug("AbstractNioByteChannel : protected final Object filterOutboundMessage(Object msg) start to invoke");
+        logger.debug("AbstractNioByteChannel : filterOutboundMessage(Object msg) : msg : {}" , msg);
         if (msg instanceof ByteBuf) {
             ByteBuf buf = (ByteBuf) msg;
             if (buf.isDirect()) {
+                logger.debug("AbstractNioByteChannel : filterOutboundMessage(Object msg) : msg instanceof ByteBuf , isDirect , return msg");
                 return msg;
             }
-
-            return newDirectBuffer(buf);
+            //return newDirectBuffer(buf);
+            ByteBuf newDirectBuffer = newDirectBuffer(buf);
+            logger.debug("AbstractNioByteChannel : filterOutboundMessage(Object msg) : msg instanceof ByteBuf , isNotDirect , " +
+                    "return newDirectBuffer(buf) : {} " , newDirectBuffer);
+            return newDirectBuffer;
         }
 
         if (msg instanceof FileRegion) {

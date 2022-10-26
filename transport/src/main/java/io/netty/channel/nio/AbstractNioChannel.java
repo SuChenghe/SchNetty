@@ -215,6 +215,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe {
 
         protected final void removeReadOp() {
+            logger.debug("AbstractNioUnsafe : protected final void removeReadOp() start to invoke");
             SelectionKey key = selectionKey();
             // Check first if the key is still valid as it may be canceled as part of the deregistration
             // from the EventLoop
@@ -224,9 +225,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             }
             int interestOps = key.interestOps();
             if ((interestOps & readInterestOp) != 0) {
+                logger.debug("AbstractNioUnsafe : removeReadOp() : key.interestOps(interestOps & ~readInterestOp);");
                 // only remove readInterestOp if needed
                 key.interestOps(interestOps & ~readInterestOp);
             }
+            logger.debug("AbstractNioUnsafe : protected final void removeReadOp() end to invoke");
         }
 
         @Override

@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
+import static java.lang.Math.log;
 import static java.lang.Math.min;
 
 /**
@@ -52,6 +53,9 @@ import static java.lang.Math.min;
  * </p>
  */
 public final class ChannelOutboundBuffer {
+    //字段CHANNEL_OUTBOUND_BUFFER_ENTRY_OVERHEAD 表示的就是 Entry 对象在内存中的占用大小，Netty这里默认是 96 字节z
+    //16 + 6 * 8 + 2 * 8 + 2 * 4 + 1 * 4  = 92 + padding = 96 ？
+
     // Assuming a 64-bit JVM:
     //  - 16 bytes object header
     //  - 6 reference fields
@@ -112,21 +116,28 @@ public final class ChannelOutboundBuffer {
      * the message was written.
      */
     public void addMessage(Object msg, int size, ChannelPromise promise) {
+        logger.debug("ChannelOutboundBuffer : public void addMessage(Object msg, int size, ChannelPromise promise) start to invoke");
         Entry entry = Entry.newInstance(msg, size, total(msg), promise);
+        logger.debug("ChannelOutboundBuffer : addMessage(...) : Entry entry = Entry.newInstance(msg, size, total(msg), promise); entry : {}" , entry);
         if (tailEntry == null) {
+            logger.debug("ChannelOutboundBuffer : tailEntry is null , set flushedEntry = null");
             flushedEntry = null;
         } else {
             Entry tail = tailEntry;
             tail.next = entry;
+            logger.debug("ChannelOutboundBuffer : old-tailEntry : {}" , tailEntry);
         }
         tailEntry = entry;
+        logger.debug("ChannelOutboundBuffer : set tailEntry = entry , tailEntry : {} " , tailEntry);
         if (unflushedEntry == null) {
             unflushedEntry = entry;
+            logger.debug("ChannelOutboundBuffer : unflushedEntry is null , set unflushedEntry = enrty , entry : {} " ,entry);
         }
 
         // increment pending bytes after adding message to the unflushed arrays.
         // See https://github.com/netty/netty/issues/1619
         incrementPendingOutboundBytes(entry.pendingSize, false);
+        logger.debug("ChannelOutboundBuffer : public void addMessage(Object msg, int size, ChannelPromise promise) end invoke");
     }
 
     /**
@@ -134,15 +145,18 @@ public final class ChannelOutboundBuffer {
      * and so you will be able to handle them.
      */
     public void addFlush() {
+        logger.debug("ChannelOutboundBuffer : public void addFlush() start to invoke");
         // There is no need to process all entries if there was already a flush before and no new messages
         // where added in the meantime.
         //
         // See https://github.com/netty/netty/issues/2577
         Entry entry = unflushedEntry;
+        logger.debug("ChannelOutboundBuffer : addFlush() : Entry entry = unflushedEntry;");
         if (entry != null) {
             if (flushedEntry == null) {
                 // there is no flushedEntry yet, so start with the entry
                 flushedEntry = entry;
+                logger.debug("ChannelOutboundBuffer : addFlush() : flushedEntry is null , set flushedEntry = entry;");
             }
             do {
                 flushed ++;
@@ -153,10 +167,12 @@ public final class ChannelOutboundBuffer {
                 }
                 entry = entry.next;
             } while (entry != null);
-
+            logger.debug("ChannelOutboundBuffer : addFlush() : flushed ++; flushed : {}" , flushed);
+            logger.debug("ChannelOutboundBuffer : addFlush() : set unflushedEntry = null;");
             // All flushed so reset unflushedEntry
             unflushedEntry = null;
         }
+        logger.debug("ChannelOutboundBuffer : public void addFlush() end invoke");
     }
 
     /**
@@ -168,14 +184,18 @@ public final class ChannelOutboundBuffer {
     }
 
     private void incrementPendingOutboundBytes(long size, boolean invokeLater) {
+        logger.debug("ChannelOutboundBuffer : private void incrementPendingOutboundBytes(long size, boolean invokeLater) start to invoke");
         if (size == 0) {
             return;
         }
 
         long newWriteBufferSize = TOTAL_PENDING_SIZE_UPDATER.addAndGet(this, size);
+        logger.debug("ChannelOutboundBuffer : incrementPendingOutboundBytes(...) , newWriteBufferSize : {}" ,newWriteBufferSize);
         if (newWriteBufferSize > channel.config().getWriteBufferHighWaterMark()) {
+            logger.debug("ChannelOutboundBuffer : incrementPendingOutboundBytes(...) , setUnritable(invokeLater) ");
             setUnwritable(invokeLater);
         }
+        logger.debug("ChannelOutboundBuffer : private void incrementPendingOutboundBytes(long size, boolean invokeLater) end invoke");
     }
 
     /**
@@ -591,6 +611,7 @@ public final class ChannelOutboundBuffer {
             final int newValue = oldValue & ~1;
             if (UNWRITABLE_UPDATER.compareAndSet(this, oldValue, newValue)) {
                 if (oldValue != 0 && newValue == 0) {
+                    //todo
                     fireChannelWritabilityChanged(invokeLater);
                 }
                 break;
